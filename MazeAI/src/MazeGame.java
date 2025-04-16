@@ -1,9 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.*;
+import mazeai.MazePanel;
 
 public class MazeGame {
     public static void main(String[] args) {

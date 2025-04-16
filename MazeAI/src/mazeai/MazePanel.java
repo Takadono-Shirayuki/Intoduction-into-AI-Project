@@ -1,3 +1,5 @@
+package mazeai;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -5,7 +7,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
 
-class MazePanel extends JPanel implements KeyListener, MouseWheelListener, MouseListener, MouseMotionListener {
+public class MazePanel extends JPanel implements KeyListener, MouseWheelListener, MouseListener, MouseMotionListener {
     private int[][] maze;
     private int rows, cols;
     private int playerX = 0, playerY = 0;
@@ -20,6 +22,7 @@ class MazePanel extends JPanel implements KeyListener, MouseWheelListener, Mouse
     private Point viewOffset = new Point(0, 0);
     private final int BASE_TILE_SIZE = 20;
 
+    // Khởi tạo mê cung với kích thước và tầm nhìn
     public MazePanel(int rows, int cols, int lightRadius) {
         this.rows = rows;
         this.cols = cols;
