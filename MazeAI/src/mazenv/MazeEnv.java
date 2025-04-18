@@ -1,19 +1,40 @@
 package mazenv;
 
 import java.awt.Point;
-import java.util.AbstractMap.SimpleEntry;
 
 public class MazeEnv {
+    public class Action{
+        public static final int UP = 0;
+        public static final int DOWN = 1;
+        public static final int LEFT = 2;
+        public static final int RIGHT = 3;
+    }
+
+    public class Buff{
+        public static final int NONE = 0;
+        public static final int SENRIGAN = 1;
+        public static final int TOU_NO_HIKARI = 2;
+        public static final int UNMEI_NO_MICHI = 3;
+        public static final int SLIME_SAN_ONEGAI = 4;
+    }
+
+    public class Debuff{
+        public static final int NONE = 0;
+        public static final int WAAMU_HOURU = 1;
+        public static final int SHIN_NO_MEIRO = 2;
+    }
+
     private Maze maze;
     private DiscoveredMaze discoveredMaze;
-    private boolean buff;
-    private boolean debuff;
-    private int maxStep;
-
-    public MazeEnv(int mazeSize, int maxStep, int pathPercent) {
+    private boolean senriganBuff = false;
+    private int slimeStep;
+    public int maxStep;
+    
+    public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep) {
         this.maze = new Maze(mazeSize, pathPercent);
         this.discoveredMaze = new DiscoveredMaze(mazeSize);
         this.maxStep = maxStep;
+        this.slimeStep = slimeStep;
     }
 
     public void createDataSet(String path) {
@@ -24,34 +45,77 @@ public class MazeEnv {
         // Implementation here
     }
 
-    public void reset() {
+    public MazeState reset() {
         maze.reset();
+        return regenerateMaze(Buff.NONE);
+    }
+
+    public MazeState reset(int buff) {
+        maze.reset();
+        return regenerateMaze(buff, Debuff.NONE);
+    }
+
+    public MazeState regenerateMaze(int buff) {
+        return regenerateMaze(buff, Debuff.NONE);
+    }
+
+    public MazeState regenerateMaze(int buff, int debuff) {
+        // Kích hoạt buff 
+        int pathToGoalAdder = 0;
+        boolean deadMaze = false;
+        switch (buff) {
+            case Buff.SENRIGAN:
+                senriganBuff = true;
+                break;
+            case Buff.UNMEI_NO_MICHI:
+                pathToGoalAdder = 1;
+            default:
+                senriganBuff = false;
+                break;
+        }
+        // Kích hoạt debuff
+        switch (debuff) {
+            case Debuff.WAAMU_HOURU:
+                maze.activateWaamuHouruDebuff();
+                break;
+            case Debuff.SHIN_NO_MEIRO:
+                deadMaze = true;
+                break;
+            default:
+                break;
+        }
+        maze.generateMaze(pathToGoalAdder, deadMaze);
         discoveredMaze.reset();
-    }
 
-    public MazeState regenerateMaze(int pathToGoalAdder) {
-        maze.generateMaze(pathToGoalAdder, false);
-        return new MazeState(discoveredMaze.getLocalObs(5, maze.getAgentPosition()),
+        // Kích hoạt buff
+        switch (buff) {
+            case Buff.SLIME_SAN_ONEGAI:
+                discoveredMaze.discoverMaze(maze.activateSlimeBuff(slimeStep), null);
+                break;
+            default:
+                discoveredMaze.discoverMaze(maze.getDiscoverData(10), null);
+                break;
+        }
+        int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
+        discoveredMaze.discoverMaze(mazeData, maze.getAgentPosition());
+        
+        return new MazeState(discoveredMaze.getLocalObs(maze.getAgentPosition()),
                 discoveredMaze.getGlobalObs(),
-                maze.getAgentPosition());
+                maze.getAgentPosition(),
+                false);
     }
 
-    public SimpleEntry<MazeState, Boolean> step(int action) {
-        boolean success = maze.step(action);
+    public Pair<MazeState, Boolean> step(int action) {
+        boolean takeAction = maze.step(action);
         Point agentPos = maze.getAgentPosition();
-        discoveredMaze.discoverMaze(discoveredMaze.getDiscoveredMaze(), agentPos, agentPos);
-        MazeState state = new MazeState(discoveredMaze.getLocalObs(5, agentPos),
+        int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
+        discoveredMaze.discoverMaze(mazeData, agentPos);
+        boolean success = maze.isGoal(agentPos);
+        MazeState state = new MazeState(discoveredMaze.getLocalObs(agentPos),
                 discoveredMaze.getGlobalObs(),
-                agentPos);
-        return new SimpleEntry<>(state, success);
-    }
-
-    public void activateBuff(String buff) {
-        this.buff = true;
-    }
-
-    public void activateDebuff(String debuff) {
-        this.debuff = true;
+                agentPos,
+                success);
+        return new Pair<MazeState, Boolean> (state, takeAction);
     }
 
     public void setMazeSize(int mazeSize) {
@@ -62,12 +126,8 @@ public class MazeEnv {
         maze.setPathPercent(pathPercent);
     }
 
-    public void setMaxStep(int maxStep) {
-        this.maxStep = maxStep;
-    }
-
     public boolean checkPositionValidity(Point position) {
-        return position.x >= 0 && position.y >= 0;
+        return maze.checkPositionValidity(position);
     }
 
     public int[][] getMaze() {
@@ -75,10 +135,14 @@ public class MazeEnv {
     }
 
     public int[][] getDiscoveredMaze() {
-        return discoveredMaze.getDiscoveredMaze();
+        return discoveredMaze.getDiscoveredMaze(getMaze());
     }
 
     public double getTauCoefficient(double tauExponent) {
         return maze.getTauCoefficient(tauExponent);
+    }
+
+    public void render() {
+        System.out.println(maze.getAgentPosition().x + " " + maze.getAgentPosition().y);
     }
 }

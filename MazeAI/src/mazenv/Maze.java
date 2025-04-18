@@ -2,13 +2,17 @@ package mazenv;
 
 import java.awt.Point;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
-import java.util.AbstractMap.SimpleEntry;
+
+import mazenv.MazeEnv.Action;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public class Maze {
     private int[][] maze;
@@ -25,8 +29,8 @@ public class Maze {
 
     public void reset() {
         this.basePosition = new Point(this.mazeSize / 6 - 1, this.mazeSize / 6 - 1);
-        this.agentPosition = new Point(basePosition); // deep copy
-        this.generateMaze(0, false);
+        this.agentPosition = new Point(basePosition);
+        this.goalPosition = new Point(mazeSize * 5 / 6, mazeSize * 5 / 6);
     }
 
     public void generateMaze(int pathToGoalAdder, boolean deadMaze) {
@@ -39,7 +43,6 @@ public class Maze {
         }
 
         Random rand = new Random();
-        double pathPercent = 70.0; // Giữ nguyên mặc định 70%
 
         while (true) {
             int totalCells = mazeSize * mazeSize;
@@ -84,7 +87,7 @@ public class Maze {
             int x = p.x;
             int y = p.y;
 
-            if (debuff && goalPosition.equals(p)) {
+            if (deadMaze && goalPosition.equals(p)) {
                 return false;
             }
 
@@ -93,6 +96,7 @@ public class Maze {
                 if (d == numberOfPath) {
                     return true;
                 }
+                continue;
             }
 
             if (visited.contains(p)) {
@@ -111,7 +115,7 @@ public class Maze {
             }
         }
 
-        return debuff; // Nếu không tìm được đường đi thì phụ thuộc vào debuff
+        return deadMaze; // Nếu không tìm được đường đi thì phụ thuộc vào debuff
     }
 
     public List<Point> getNeighbors(int x, int y) {
@@ -139,61 +143,121 @@ public class Maze {
     }
 
     public boolean step(int action) {
-        int x = agentPosition.x;
-        int y = agentPosition.y;
-
-        int newX = x;
-        int newY = y;
+        int newX = agentPosition.x;
+        int newY = agentPosition.y;
 
         // Xác định hành động
         switch (action) {
-            case 0:
-                newX = x - 1;
+            case Action.UP:
+                newX --;
                 break; // Lên
-            case 1:
-                newX = x + 1;
+            case Action.DOWN:
+                newX ++;
                 break; // Xuống
-            case 2:
-                newY = y - 1;
+            case Action.LEFT:
+                newY --;
                 break; // Trái
-            case 3:
-                newY = y + 1;
+            case Action.RIGHT:
+                newY ++;
                 break; // Phải
             default:
                 break;
         }
 
-        boolean done = false;
-
+        boolean takeAction = false;
         // Kiểm tra hợp lệ và không phải tường trong discovered_maze
-        if (validCheck(newX, newY) && discoveredMaze[newX + 5][newY + 5] != -5) {
-            // Cập nhật vị trí agent
-            agentPosition = new Point(newX, newY);
-            discoverMaze();
-
-            // Kiểm tra kết thúc
-            if (agentPosition.equals(goalPosition)) {
-                done = true;
+        if (newX >= 0 && newY >= 0 && newX < mazeSize && newY < mazeSize) {
+            if (maze[newX][newY] != -1) {
+                agentPosition.setLocation(newX, newY);
+                takeAction = true;
             }
+        }
+        return takeAction;
+    }
 
-            // Giảm giá trị ô đã khám phá
-            discoveredMaze[newX + 5][newY + 5] -= 1;
+    public int[][] getDiscoverData(int obsSize) {
+        int[][] discoverData = new int[mazeSize][mazeSize];
+        for (int i = 0; i < discoverData.length; i++) {
+            for (int j = 0; j < discoverData[i].length; j++) {
+                discoverData[i][j] = 1; // Mặc định là chưa khám phá (1)
+            }
+        }
+        int startX = agentPosition.x - obsSize;
+        int startY = agentPosition.y - obsSize;
+        int endX = agentPosition.x + obsSize + 1;
+        int endY = agentPosition.y + obsSize + 1;
+        for (int i = startX; i < endX; i++) {
+            for (int j = startY; j < endY; j++) {
+                if (i >= 0 && j >= 0 && i < mazeSize && j < mazeSize) {
+                    discoverData[i][j] = 5 * maze[i][j]; // Đánh dấu đã khám phá
+                }
+            }
+        }
+        return discoverData;
+    }
+
+    public int[][] activateSlimeBuff(int step) {
+        // Tạo ma trận đầu ra
+        int[][] slimeBuff = new int[mazeSize][mazeSize];
+        for (int i = 0; i < slimeBuff.length; i++) {
+            for (int j = 0; j < slimeBuff[i].length; j++) {
+                slimeBuff[i][j] = 1; // Mặc định là chưa khám phá
+            }
         }
 
-        // Cập nhật quan sát
-        exportData.put("local_obs", getObservation());
-        exportData.put("global_obs", downsample(discoveredMaze));
-        exportData.put("agent_position", agentPosition);
+        // Tập các đỉnh đã duyệt
+        Set<Point> visited = new HashSet<>();
+        List<Point> visitedOrder = new ArrayList<>();
 
-        return done;
+        // Hàng đợi (FIFO) để quản lý các đỉnh
+        Queue<Point> queue = new LinkedList<>();
+        queue.add(agentPosition);
+
+        // Bắt đầu duyệt đồ thị
+        while (!queue.isEmpty()) {
+            // Lấy một đỉnh từ hàng đợi
+            Point current = queue.poll();
+            int x = current.x;
+            int y = current.y;
+
+            // Kiểm tra nếu đỉnh chưa được duyệt
+            if (!visited.contains(current)) {
+                visited.add(current);
+                visitedOrder.add(current);
+
+                slimeBuff[x][y] = 0; // Đánh dấu đã khám phá
+
+                if (visitedOrder.size() >= step) 
+                    break; // Dừng lại nếu đã đủ số bước
+
+                // Lấy danh sách các điểm lân cận
+                List<Point> neighbors = getNeighbors(x, y);
+                for (Point neighbor : neighbors) {
+                    int nx = neighbor.x;
+                    int ny = neighbor.y;
+
+                    // Chỉ đi qua các đường hợp lệ
+                    if (maze[nx][ny] > -1 && !visited.contains(neighbor)) {
+                        queue.add(neighbor);
+                    }
+                }
+            }
+        }
+        return slimeBuff;
     }
 
-    public SimpleEntry<int[][], Point> getDiscoverData(int obsSize) {
-        return null;
-    }
-
-    public SimpleEntry<int[][], Point> activateSlimeBuff(int step) {
-        return null;
+    public void activateWaamuHouruDebuff()
+    {
+        // Đặt vị trí của agent về vị trí ngẫu nhiên trong mê cung
+        Random rand = new Random();
+        while (true) {
+            int newX = mazeSize / 3 + rand.nextInt(mazeSize * 2 / 3);
+            int newY = mazeSize / 3 + rand.nextInt(mazeSize * 2 / 3);
+            if (newX != goalPosition.x && newY != goalPosition.y) {
+                agentPosition.setLocation(newX, newY);
+                break;
+            }
+        }
     }
 
     public int[][] getMaze() {
@@ -213,6 +277,15 @@ public class Maze {
     }
 
     public double getTauCoefficient(double tauExponent) {
-        return Math.pow(mazeSize, tauExponent);
+        int distance = goalPosition.x - agentPosition.x + goalPosition.y - agentPosition.y;
+        return Math.pow(distance / (4 / 3.0 * mazeSize), tauExponent);
+    }
+
+    public boolean isGoal(Point agentPosition) {
+        return goalPosition.equals(agentPosition);
+    }
+
+    public boolean checkPositionValidity(Point position) {
+        return position.x >= 0 && position.y >= 0 && position.x < mazeSize && position.y < mazeSize && maze[position.x][position.y] != -1;
     }
 }
