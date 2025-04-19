@@ -2,7 +2,7 @@ Maze Environment Configuration:
 maze_size: 30
 max_steps: 15
 path_percent: 70
-buff: None
+buff: none
 
 Neural Network Configuration:
 local_size: 11

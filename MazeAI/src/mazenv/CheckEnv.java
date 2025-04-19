@@ -8,6 +8,7 @@ public class CheckEnv {
         MazeEnv mazeEnv = new MazeEnv(20, 100, 50, 50);
         mazeEnv.reset();
         mazeEnv.render();
+        mazeEnv.step(0);
         System.out.println(mazeEnv.getTauCoefficient(2));
     }
 }

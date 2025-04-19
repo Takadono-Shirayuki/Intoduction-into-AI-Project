@@ -15,6 +15,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 public class Maze {
+    public static final int WALL = -1;
+    public static final int PATH = 0;
+    public static final int UNEXPLORED = 1;
+    public static final int GOAL = 2;
+    public static final int AGENT_POSITION = 3;
+
     private int[][] maze;
     private Point agentPosition;
     private int mazeSize;
@@ -27,12 +33,20 @@ public class Maze {
         this.pathPercent = pathPercent;
     }
 
+    /**
+     * Đặt lại trạng thái ban đầu cho mê cung.
+     */
     public void reset() {
         this.basePosition = new Point(this.mazeSize / 6 - 1, this.mazeSize / 6 - 1);
         this.agentPosition = new Point(basePosition);
         this.goalPosition = new Point(mazeSize * 5 / 6, mazeSize * 5 / 6);
     }
 
+    /**
+     * Tạo mê cung ngẫu nhiên 
+     * @param pathToGoalAdder Tham số điều chỉnh số lượng đường đi đến đích.
+     * @param deadMaze Nếu true, mê cung sẽ không có đường đi đến đích.
+     */
     public void generateMaze(int pathToGoalAdder, boolean deadMaze) {
 
         int numberOfPath;
@@ -49,12 +63,12 @@ public class Maze {
             int numPaths = (int) (totalCells * pathPercent / 100.0);
             int numWalls = totalCells - numPaths;
 
-            // Tạo danh sách ngẫu nhiên các giá trị đường (0) và tường (-1)
+            // Tạo danh sách ngẫu nhiên các giá trị đường và tường 
             List<Integer> mazeValues = new ArrayList<>();
             for (int i = 0; i < numPaths; i++)
-                mazeValues.add(0);
+                mazeValues.add(PATH);
             for (int i = 0; i < numWalls; i++)
-                mazeValues.add(-1);
+                mazeValues.add(WALL);
             Collections.shuffle(mazeValues, rand);
 
             // Điền dữ liệu vào ma trận mê cung
@@ -66,8 +80,8 @@ public class Maze {
             }
 
             // Đặt điểm bắt đầu và đích
-            maze[agentPosition.x][agentPosition.y] = 0;
-            maze[goalPosition.x][goalPosition.y] = 2;
+            maze[agentPosition.x][agentPosition.y] = AGENT_POSITION;
+            maze[goalPosition.x][goalPosition.y] = GOAL;
 
             // Kiểm tra tính hợp lệ
             if (validateMaze(numberOfPath, deadMaze)) {
@@ -76,7 +90,13 @@ public class Maze {
         }
     }
 
-    public boolean validateMaze(int numberOfPath, boolean deadMaze) {
+    /**
+     * Kiểm tra tính hợp lệ của mê cung.
+     * @param numberOfPath Số lượng đường đi đến đích.
+     * @param deadMaze Nếu true, mê cung sẽ không có đường đi đến đích.
+     * @return true nếu mê cung hợp lệ, false nếu không hợp lệ.
+     */
+    private boolean validateMaze(int numberOfPath, boolean deadMaze) {
         Stack<Point> stack = new Stack<>();
         stack.push(new Point(agentPosition));
         Set<Point> visited = new HashSet<>();
@@ -109,16 +129,22 @@ public class Maze {
             for (Point neighbor : neighbors) {
                 int nx = neighbor.x;
                 int ny = neighbor.y;
-                if (maze[nx][ny] > -1 && !visited.contains(neighbor)) {
+                if (maze[nx][ny] != WALL && !visited.contains(neighbor)) {
                     stack.push(neighbor);
                 }
             }
         }
 
-        return deadMaze; // Nếu không tìm được đường đi thì phụ thuộc vào debuff
+        return deadMaze; // Nếu không tìm được đường đi thì phụ thuộc vào deadMaze
     }
 
-    public List<Point> getNeighbors(int x, int y) {
+    /**
+     * Lấy danh sách các điểm lân cận của một điểm trong mê cung.
+     * * @param x Tọa độ x của điểm.
+     * * @param y Tọa độ y của điểm.
+     * * @return Danh sách các điểm lân cận.
+     */
+    private List<Point> getNeighbors(int x, int y) {
         List<Point> neighbors = new ArrayList<>();
 
         // Bốn hướng: lên, xuống, trái, phải
@@ -142,6 +168,13 @@ public class Maze {
         return neighbors;
     }
 
+    /**
+     * Thực hiện hành động của tác tử trong mê cung. <p>
+     * Các hành động được định nghĩa trong lớp Action.
+     * @param action Hành động của tác tử.
+     * @return true nếu hành động hợp lệ, false nếu không hợp lệ.
+     * @note: Nếu hành động không hợp lệ, tác tử sẽ không di chuyển.
+     */
     public boolean step(int action) {
         int newX = agentPosition.x;
         int newY = agentPosition.y;
@@ -167,7 +200,7 @@ public class Maze {
         boolean takeAction = false;
         // Kiểm tra hợp lệ và không phải tường trong discovered_maze
         if (newX >= 0 && newY >= 0 && newX < mazeSize && newY < mazeSize) {
-            if (maze[newX][newY] != -1) {
+            if (maze[newX][newY] != WALL) {
                 agentPosition.setLocation(newX, newY);
                 takeAction = true;
             }
@@ -175,11 +208,16 @@ public class Maze {
         return takeAction;
     }
 
+    /** 
+     * Lấy dữ liệu khám phá của mê cung.
+     * @param obsSize Kích thước của ô quan sát.
+     * @return Ma trận chứa dữ liệu khám phá.
+     */
     public int[][] getDiscoverData(int obsSize) {
         int[][] discoverData = new int[mazeSize][mazeSize];
         for (int i = 0; i < discoverData.length; i++) {
             for (int j = 0; j < discoverData[i].length; j++) {
-                discoverData[i][j] = 1; // Mặc định là chưa khám phá (1)
+                discoverData[i][j] = UNEXPLORED; // Mặc định là chưa khám phá
             }
         }
         int startX = agentPosition.x - obsSize;
@@ -193,21 +231,29 @@ public class Maze {
                 }
             }
         }
+        discoverData[goalPosition.x][goalPosition.y] = 5 * GOAL; // Đánh dấu vị trí đích
         return discoverData;
     }
 
+    /**
+     * Kích hoạt buff slime-san onegai trong mê cung.
+     * @param step Số bước di chuyển của slime.
+     * @return Ma trận chứa dữ liệu khám phá mê cung.
+     */
     public int[][] activateSlimeBuff(int step) {
         // Tạo ma trận đầu ra
         int[][] slimeBuff = new int[mazeSize][mazeSize];
         for (int i = 0; i < slimeBuff.length; i++) {
             for (int j = 0; j < slimeBuff[i].length; j++) {
-                slimeBuff[i][j] = 1; // Mặc định là chưa khám phá
+                slimeBuff[i][j] = UNEXPLORED; // Mặc định là chưa khám phá
             }
         }
 
         // Tập các đỉnh đã duyệt
         Set<Point> visited = new HashSet<>();
-        List<Point> visitedOrder = new ArrayList<>();
+
+        // Đếm số lượng bước
+        int stepCount = 0;
 
         // Hàng đợi (FIFO) để quản lý các đỉnh
         Queue<Point> queue = new LinkedList<>();
@@ -223,12 +269,13 @@ public class Maze {
             // Kiểm tra nếu đỉnh chưa được duyệt
             if (!visited.contains(current)) {
                 visited.add(current);
-                visitedOrder.add(current);
+                stepCount++;
 
-                slimeBuff[x][y] = 0; // Đánh dấu đã khám phá
+                slimeBuff[x][y] = 5 * maze[x][y]; // Đánh dấu đã khám phá
 
-                if (visitedOrder.size() >= step) 
+                if (stepCount >= step) {
                     break; // Dừng lại nếu đã đủ số bước
+                }
 
                 // Lấy danh sách các điểm lân cận
                 List<Point> neighbors = getNeighbors(x, y);
@@ -237,7 +284,7 @@ public class Maze {
                     int ny = neighbor.y;
 
                     // Chỉ đi qua các đường hợp lệ
-                    if (maze[nx][ny] > -1 && !visited.contains(neighbor)) {
+                    if (maze[nx][ny] != WALL && !visited.contains(neighbor)) {
                         queue.add(neighbor);
                     }
                 }
@@ -246,6 +293,9 @@ public class Maze {
         return slimeBuff;
     }
 
+    /**
+     * Kích hoạt debuff waamu houru trong mê cung.
+     */
     public void activateWaamuHouruDebuff()
     {
         // Đặt vị trí của agent về vị trí ngẫu nhiên trong mê cung
@@ -260,18 +310,48 @@ public class Maze {
         }
     }
 
+    /**
+     * Lấy ma trận mê cung hiện tại. <p>
+     * Ý nghĩa giá trị của từng ô xem tại lớp Maze.
+     * @note: Tác tử sẽ được đánh dấu tại vị trí của nó trong ma trận.
+     * @return Mê cung hiện tại.
+     */
     public int[][] getMaze() {
-        return maze;
+        int[][] returnMaze = maze.clone();
+        returnMaze[agentPosition.x][agentPosition.y] = AGENT_POSITION; // Đánh dấu vị trí của tác tử
+        return returnMaze;  
     }
 
+    /**
+     * Lấy vị trí của tác tử trong mê cung.
+     * @return Tọa độ của tác tử.
+     */
     public Point getAgentPosition() {
         return agentPosition;
     }
 
-    public void setPathPercent(int pathPercent) {
-        this.pathPercent = pathPercent;
+    /**
+     * Lấy vị trí của điểm đích trong mê cung.
+     * @return Tọa độ của điểm đích.
+     */
+    public Point getGoalPosition() {
+        return goalPosition;
     }
 
+    /**
+     * Đặt mật độ đường đi trong mê cung.
+     * @param pathPercent Tỷ lệ đường đi trong mê cung (0-100).
+     */
+    public void setPathPercent(int pathPercent) {
+        if (pathPercent > 0 && pathPercent <= 100) {
+            this.pathPercent = pathPercent;
+        }
+    }
+
+    /**
+     * Lấy tỷ lệ đường đi trong mê cung.
+     * @return Tỷ lệ đường đi trong mê cung (0-100).
+     */
     public int getPathPercent() {
         return pathPercent;
     }
@@ -281,10 +361,20 @@ public class Maze {
         return Math.pow(distance / (4 / 3.0 * mazeSize), tauExponent);
     }
 
-    public boolean isGoal(Point agentPosition) {
+    /**
+     * Kiểm tra xem tác tử đã đến đích hay chưa.
+     * @return true nếu tác tử đã đến đích, false nếu chưa.
+     */
+    public boolean isGoal() {
         return goalPosition.equals(agentPosition);
     }
 
+    /**
+     * Kiểm tra tính hợp lệ của vị trí trong mê cung. <p>
+     * Vị trí hợp lệ là vị trí không nằm trong tường và nằm trong kích thước của mê cung.
+     * @param position Vị trí cần kiểm tra.
+     * @return true nếu vị trí hợp lệ, false nếu không hợp lệ.
+     */
     public boolean checkPositionValidity(Point position) {
         return position.x >= 0 && position.y >= 0 && position.x < mazeSize && position.y < mazeSize && maze[position.x][position.y] != -1;
     }
