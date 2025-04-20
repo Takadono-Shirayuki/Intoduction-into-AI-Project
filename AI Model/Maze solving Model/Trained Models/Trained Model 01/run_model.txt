@@ -1,0 +1,102 @@
+Model: model01
+Number of episodes: 50000
+Average number of steps: 54
+Max: 126
+Min: 42
+---------------------------------------------------
+Model: model01
+Number of episodes: 50000
+Average number of steps: 53
+Max: 112
+Min: 42
+---------------------------------------------------
+Model: model01
+Number of episodes: 50000
+Average number of steps: 53
+Max: 112
+Min: 42
+---------------------------------------------------
+Model: model04
+Number of episodes: 50000
+Average number of steps: 54
+Max: 126
+Min: 42
+---------------------------------------------------
+Model: model04
+Number of episodes: 50000
+Average number of steps: 53
+Max: 108
+Min: 42
+---------------------------------------------------
+Model: model07
+Number of episodes: 50000
+Average number of steps: 54
+Max: 122
+Min: 42
+---------------------------------------------------
+Model: model07
+Number of episodes: 50000
+Average number of steps: 53
+Max: 116
+Min: 42
+---------------------------------------------------
+Model: model10
+Number of episodes: 50000
+Average number of steps: 55
+Max: 138
+Min: 42
+---------------------------------------------------
+Model: model10
+Number of episodes: 50000
+Average number of steps: 53
+Max: 108
+Min: 42
+---------------------------------------------------
+Model: model13
+Number of episodes: 50000
+Average number of steps: 55
+Max: 138
+Min: 42
+---------------------------------------------------
+Model: model13
+Number of episodes: 50000
+Average number of steps: 54
+Max: 124
+Min: 42
+---------------------------------------------------
+Model: model02
+Number of episodes: 50000
+Average number of steps: 53
+Max: 102
+Min: 42
+---------------------------------------------------
+Model: model02
+Number of episodes: 50000
+Average number of steps: 53
+Max: 122
+Min: 42
+---------------------------------------------------
+Model: model02
+Number of episodes: 50000
+Average number of steps: 53
+Max: 138
+Min: 42
+---------------------------------------------------
+Model: model03
+Number of episodes: 50000
+Average number of steps: 54
+Max: 110
+Min: 42
+---------------------------------------------------
+Model: model03
+Number of episodes: 50000
+Average number of steps: 54
+Max: 116
+Min: 42
+---------------------------------------------------
+Model: model01
+Number of episodes: 50000
+Average number of steps: 54
+Max: 104
+Min: 42
+---------------------------------------------------
