@@ -21,18 +21,24 @@ public class MazePanel extends JPanel implements KeyListener, MouseWheelListener
     private Point lastDragPoint;
     private Point viewOffset = new Point(0, 0);
     private final int BASE_TILE_SIZE = 20;
+    private Image playerIcon;
 
-    // Khởi tạo mê cung với kích thước và tầm nhìn
     public MazePanel(int rows, int cols, int lightRadius) {
         this.rows = rows;
         this.cols = cols;
         this.lightRadius = lightRadius;
+        try {
+            playerIcon = new ImageIcon(getClass().getResource("/mazeai/Icon/Robot.jpg")).getImage().getScaledInstance(BASE_TILE_SIZE - 4, BASE_TILE_SIZE - 4, Image.SCALE_SMOOTH);
+        } catch (Exception e) {
+            System.err.println("Không thể tải Robot.jpg");
+        }
         generateNewMaze();
         setFocusable(true);
         addKeyListener(this);
         addMouseWheelListener(this);
         addMouseListener(this);
         addMouseMotionListener(this);
+        setOpaque(false);
     }
 
     public void generateNewMaze() {
@@ -60,14 +66,13 @@ public class MazePanel extends JPanel implements KeyListener, MouseWheelListener
     private float calculateInitialScale() {
         Container parent = getParent();
         if (parent == null) return 1.0f;
-        
+
         int parentWidth = parent.getWidth();
         int parentHeight = parent.getHeight();
-        
-        float scaleX = (float)parentWidth / (cols * BASE_TILE_SIZE);
-        float scaleY = (float)parentHeight / (rows * BASE_TILE_SIZE);
-        
-        // Giới hạn scale trong khoảng từ 0.1 đến 10
+
+        float scaleX = (float) parentWidth / (cols * BASE_TILE_SIZE);
+        float scaleY = (float) parentHeight / (rows * BASE_TILE_SIZE);
+
         return Math.max(0.1f, Math.min(Math.min(scaleX, scaleY), 10.0f));
     }
 
@@ -84,54 +89,60 @@ public class MazePanel extends JPanel implements KeyListener, MouseWheelListener
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        
-        // Áp dụng transform để phóng to và di chuyển
+
         g2d.translate(viewOffset.x, viewOffset.y);
         g2d.scale(scale, scale);
 
-        // Vẽ nền
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(0, 0, cols * BASE_TILE_SIZE, rows * BASE_TILE_SIZE);
-
-        // Vẽ mê cung
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 boolean visible = fullView || temporaryView || isInLightRadius(col, row);
-                
-                if (!visible) {
-                    g2d.setColor(new Color(30, 30, 30));
-                } else if (maze[row][col] == 1) {
+
+                if (!visible) continue;
+
+                if (maze[row][col] == 1) {
                     g2d.setColor(Color.BLACK);
                 } else {
                     g2d.setColor(Color.WHITE);
                 }
-                
+
                 g2d.fillRect(col * BASE_TILE_SIZE, row * BASE_TILE_SIZE, BASE_TILE_SIZE, BASE_TILE_SIZE);
-                g2d.setColor(Color.GRAY);
-                g2d.drawRect(col * BASE_TILE_SIZE, row * BASE_TILE_SIZE, BASE_TILE_SIZE, BASE_TILE_SIZE);
             }
         }
 
-        // Vẽ đường đi
+        // Vẽ lưới ô (dù là trong suốt hay không)
+        g2d.setColor(new Color(100, 100, 100, 200));
+        for (int r = 0; r <= rows; r++) {
+            g2d.drawLine(0, r * BASE_TILE_SIZE, cols * BASE_TILE_SIZE, r * BASE_TILE_SIZE);
+        }
+        for (int c = 0; c <= cols; c++) {
+            g2d.drawLine(c * BASE_TILE_SIZE, 0, c * BASE_TILE_SIZE, rows * BASE_TILE_SIZE);
+        }
+
         if (!currentPath.isEmpty()) {
             g2d.setColor(new Color(0, 200, 255, 150));
             for (Point p : currentPath) {
-                g2d.fillRect(p.x * BASE_TILE_SIZE + 1, p.y * BASE_TILE_SIZE + 1, 
-                            BASE_TILE_SIZE - 2, BASE_TILE_SIZE - 2);
+                g2d.fillRect(p.x * BASE_TILE_SIZE + 1, p.y * BASE_TILE_SIZE + 1,
+                        BASE_TILE_SIZE - 2, BASE_TILE_SIZE - 2);
             }
         }
 
-        // Vẽ đích
         g2d.setColor(Color.RED);
-        g2d.fillRect(goalX * BASE_TILE_SIZE + 1, goalY * BASE_TILE_SIZE + 1, 
-                     BASE_TILE_SIZE - 2, BASE_TILE_SIZE - 2);
+        g2d.fillRect(goalX * BASE_TILE_SIZE + 1, goalY * BASE_TILE_SIZE + 1,
+                BASE_TILE_SIZE - 2, BASE_TILE_SIZE - 2);
 
-        // Vẽ người chơi
-        g2d.setColor(Color.BLUE);
-        g2d.fillOval(playerX * BASE_TILE_SIZE + 2, playerY * BASE_TILE_SIZE + 2, 
-                     BASE_TILE_SIZE - 4, BASE_TILE_SIZE - 4);
+        if (playerIcon != null) {
+            g2d.drawImage(playerIcon, playerX * BASE_TILE_SIZE + 2, playerY * BASE_TILE_SIZE + 2, this);
+        } else {
+            g2d.setColor(Color.BLUE);
+            g2d.fillOval(playerX * BASE_TILE_SIZE + 2, playerY * BASE_TILE_SIZE + 2,
+                    BASE_TILE_SIZE - 4, BASE_TILE_SIZE - 4);
+        }
+
+        // Vẽ khung mê cung
+        g2d.setColor(Color.DARK_GRAY);
+        g2d.setStroke(new BasicStroke(2));
+        g2d.drawRect(0, 0, cols * BASE_TILE_SIZE, rows * BASE_TILE_SIZE);
     }
-
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(
