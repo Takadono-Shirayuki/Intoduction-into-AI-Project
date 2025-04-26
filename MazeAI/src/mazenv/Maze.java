@@ -80,7 +80,7 @@ public class Maze {
             }
 
             // Đặt điểm bắt đầu và đích
-            maze[agentPosition.x][agentPosition.y] = AGENT_POSITION;
+            maze[agentPosition.x][agentPosition.y] = PATH;
             maze[goalPosition.x][goalPosition.y] = GOAL;
 
             // Kiểm tra tính hợp lệ
@@ -317,9 +317,14 @@ public class Maze {
      * @return Mê cung hiện tại.
      */
     public int[][] getMaze() {
-        int[][] returnMaze = maze.clone();
+        int[][] returnMaze = new int[mazeSize][mazeSize];
+        for (int i = 0; i < mazeSize; i++) {
+            for (int j = 0; j < mazeSize; j++) {
+                returnMaze[i][j] = maze[i][j]; // Sao chép mê cung
+            }
+        }
         returnMaze[agentPosition.x][agentPosition.y] = AGENT_POSITION; // Đánh dấu vị trí của tác tử
-        return returnMaze;  
+        return returnMaze;      
     }
 
     /**
