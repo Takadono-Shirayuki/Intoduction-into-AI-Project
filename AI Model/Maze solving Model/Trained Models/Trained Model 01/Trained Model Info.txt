@@ -1,9 +1,0 @@
-Maze_size = 30
-local_obs = 7
-step_max = 15
-
-Buff
-Senrigan: tăng local_obs lên 11
-Tou no hikari: Chiếu sáng khu vực 20x20 xung quanh
-slime-san onegai: step = 50
-unmei no michi: adder = 1

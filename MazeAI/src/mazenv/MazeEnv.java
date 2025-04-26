@@ -28,10 +28,25 @@ public class MazeEnv {
      * Các buff này được sử dụng trong phương thức regenerateMaze() để kích hoạt buff cho mê cung.
      */
     public class Buff{
+        /**
+         * Không có buff nào được kích hoạt.
+         */
         public static final int NONE = 0;
+        /**
+         * Buff tăng tầm nhìn của tác tử.
+         */
         public static final int SENRIGAN = 1;
+        /**
+         * Buff nhìn thấy khu vực rộng lớn xung quanh tác tử.
+         */
         public static final int TOU_NO_HIKARI = 2;
+        /**
+         * Buff tăng số lượng đường đi đến đích.
+         */
         public static final int UNMEI_NO_MICHI = 3;
+        /**
+         * Buff tìm kiếm đường có thể đi xung quanh tác tử.
+         */
         public static final int SLIME_SAN_ONEGAI = 4;
     }
 
@@ -42,8 +57,17 @@ public class MazeEnv {
      * Các debuff này được sử dụng trong phương thức regenerateMaze() để kích hoạt debuff cho mê cung.
      */
     public class Debuff{
+        /**
+         * Không có debuff nào được kích hoạt.
+         */
         public static final int NONE = 0;
+        /**
+         * Debuff dịch chuyển tác tử đến vị trí ngẫu nhiên trong mê cung.
+         */
         public static final int WAAMU_HOURU = 1;
+        /**
+         * Debuff tạo mê cung chết, không có đường đi đến đích.
+         */
         public static final int SHIN_NO_MEIRO = 2;
     }
 
@@ -137,17 +161,16 @@ public class MazeEnv {
         // Kích hoạt buff
         switch (buff) {
             case Buff.SLIME_SAN_ONEGAI:
-                discoveredMaze.discoverMaze(maze.activateSlimeBuff(slimeStep), null);
+                discoveredMaze.discoverMaze(maze.activateSlimeBuff(slimeStep));
                 break;
             default:
-                discoveredMaze.discoverMaze(maze.getDiscoverData(10), null);
+                discoveredMaze.discoverMaze(maze.getDiscoverData(10));
                 break;
         }
         int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
-        discoveredMaze.discoverMaze(mazeData, maze.getAgentPosition());
+        discoveredMaze.discoverMaze(mazeData);
         
-        return new MazeState(discoveredMaze.getLocalObs(maze.getAgentPosition()),
-                discoveredMaze.getGlobalObs(),
+        return new MazeState(discoveredMaze.getDiscoveredMaze(),
                 maze.getAgentPosition(),
                 maze.getGoalPosition(),
                 false);
@@ -167,10 +190,9 @@ public class MazeEnv {
         boolean takeAction = maze.step(action);
         Point agentPos = maze.getAgentPosition();
         int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
-        discoveredMaze.discoverMaze(mazeData, agentPos);
+        discoveredMaze.discoverMaze(mazeData);
         boolean success = maze.isGoal();
-        MazeState state = new MazeState(discoveredMaze.getLocalObs(agentPos),
-                discoveredMaze.getGlobalObs(),
+        MazeState state = new MazeState(discoveredMaze.getDiscoveredMaze(),
                 agentPos,
                 maze.getGoalPosition(),
                 success);
@@ -218,18 +240,6 @@ public class MazeEnv {
      * @return Ma trận đã khám phá.
      */
     public int[][] getDiscoveredMaze() {
-        return discoveredMaze.getDiscoveredMaze(getMaze());
-    }
-
-    /** 
-     * Lấy hệ số tau dùng trong tính toán.
-     * 
-     */
-    public double getTauCoefficient(double tauExponent) {
-        return maze.getTauCoefficient(tauExponent);
-    }
-
-    public void render() {
-        System.out.println(maze.getAgentPosition().x + " " + maze.getAgentPosition().y);
+        return discoveredMaze.getDiscoveredMaze();
     }
 }

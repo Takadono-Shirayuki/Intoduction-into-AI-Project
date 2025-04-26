@@ -6,6 +6,9 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+
 
 public class MazeInterface {
     private JFrame frame;
