@@ -16,8 +16,8 @@ import java.util.LinkedList;
 
 public class Maze {
     public static final int WALL = -1;
-    public static final int PATH = 0;
-    public static final int UNEXPLORED = 1;
+    public static final int UNEXPLORED = 0;
+    public static final int PATH = 1;
     public static final int GOAL = 2;
     public static final int AGENT_POSITION = 3;
 
@@ -31,8 +31,22 @@ public class Maze {
     public Maze(int mazeSize, int pathPercent) {
         this.mazeSize = mazeSize;
         this.pathPercent = pathPercent;
+        reset();
     }
 
+    public Maze(String mazeString) {
+        String[] rows = mazeString.split("\n");
+        this.mazeSize = rows.length;
+        this.maze = new int[mazeSize][mazeSize];
+        for (int i = 0; i < mazeSize; i++) {
+            String[] cols = rows[i].split(" ");
+            for (int j = 0; j < mazeSize; j++) {
+                maze[i][j] = Integer.parseInt(cols[j]);
+            }
+        }
+        this.agentPosition = new Point(mazeSize / 6 - 1, mazeSize / 6 - 1);
+        this.goalPosition = new Point(mazeSize * 5 / 6, mazeSize * 5 / 6);
+    }
     /**
      * Đặt lại trạng thái ban đầu cho mê cung.
      */
@@ -48,7 +62,6 @@ public class Maze {
      * @param deadMaze Nếu true, mê cung sẽ không có đường đi đến đích.
      */
     public void generateMaze(int pathToGoalAdder, boolean deadMaze) {
-
         int numberOfPath;
         if (agentPosition.x >= mazeSize * 2 / 3 && agentPosition.y >= mazeSize * 2 / 3) {
             numberOfPath = 1 + pathToGoalAdder;
@@ -227,11 +240,11 @@ public class Maze {
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
                 if (i >= 0 && j >= 0 && i < mazeSize && j < mazeSize) {
-                    discoverData[i][j] = 5 * maze[i][j]; // Đánh dấu đã khám phá
+                    discoverData[i][j] = maze[i][j]; // Đánh dấu đã khám phá
                 }
             }
         }
-        discoverData[goalPosition.x][goalPosition.y] = 5 * GOAL; // Đánh dấu vị trí đích
+        discoverData[goalPosition.x][goalPosition.y] = GOAL; // Đánh dấu vị trí đích
         return discoverData;
     }
 
@@ -271,7 +284,7 @@ public class Maze {
                 visited.add(current);
                 stepCount++;
 
-                slimeBuff[x][y] = 5 * maze[x][y]; // Đánh dấu đã khám phá
+                slimeBuff[x][y] = maze[x][y]; // Đánh dấu đã khám phá
 
                 if (stepCount >= step) {
                     break; // Dừng lại nếu đã đủ số bước
@@ -359,11 +372,6 @@ public class Maze {
      */
     public int getPathPercent() {
         return pathPercent;
-    }
-
-    public double getTauCoefficient(double tauExponent) {
-        int distance = goalPosition.x - agentPosition.x + goalPosition.y - agentPosition.y;
-        return Math.pow(distance / (4 / 3.0 * mazeSize), tauExponent);
     }
 
     /**

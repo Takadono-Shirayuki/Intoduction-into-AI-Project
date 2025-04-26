@@ -3,8 +3,7 @@ package mazenv;
 import java.awt.Point;
 
 public class MazeState {
-    public int[][] localObs;
-    public int[][] globalObs;
+    public int[][] discoveredMaze;
     public Point agentPosition;
     public Point goalPosition;
     public boolean success;
@@ -16,9 +15,8 @@ public class MazeState {
      * @param agentPosition Vị trí của tác tử trong mê cung.
      * @param success Trạng thái đã đến đích hay chưa.
      */
-    public MazeState(int[][] localObs, int[][] globalObs, Point agentPosition, Point goalPosition, boolean success) {
-        this.localObs = localObs;
-        this.globalObs = globalObs;
+    public MazeState(int[][] discoveredMaze, Point agentPosition, Point goalPosition, boolean success) {
+        this.discoveredMaze = discoveredMaze;
         this.agentPosition = agentPosition;
         this.goalPosition = goalPosition;
         this.success = success;

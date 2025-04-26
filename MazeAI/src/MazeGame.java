@@ -1,7 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import mazeai.MazePanel;
 
 public class MazeGame {
     public static void main(String[] args) {
