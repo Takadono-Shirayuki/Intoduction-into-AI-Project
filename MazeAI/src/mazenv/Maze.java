@@ -40,6 +40,7 @@ public class Maze {
         this.basePosition = new Point(this.mazeSize / 6 - 1, this.mazeSize / 6 - 1);
         this.agentPosition = new Point(basePosition);
         this.goalPosition = new Point(mazeSize * 5 / 6, mazeSize * 5 / 6);
+        generateMaze(0, false); // Regenerate maze khi reset
     }
 
     /**
@@ -176,36 +177,35 @@ public class Maze {
      * @note: Nếu hành động không hợp lệ, tác tử sẽ không di chuyển.
      */
     public boolean step(int action) {
-        int newX = agentPosition.x;
-        int newY = agentPosition.y;
-
-        // Xác định hành động
+        // Lưu vị trí cũ
+        int oldX = agentPosition.x;
+        int oldY = agentPosition.y;
+        
+        // Tính toán vị trí mới
+        int newX = oldX;
+        int newY = oldY;
+    
         switch (action) {
-            case Action.UP:
-                newX --;
-                break; // Lên
-            case Action.DOWN:
-                newX ++;
-                break; // Xuống
-            case Action.LEFT:
-                newY --;
-                break; // Trái
-            case Action.RIGHT:
-                newY ++;
-                break; // Phải
-            default:
-                break;
+            case Action.UP:    newX--; break;
+            case Action.DOWN:  newX++; break;
+            case Action.LEFT:  newY--; break;
+            case Action.RIGHT: newY++; break;
         }
-
-        boolean takeAction = false;
-        // Kiểm tra hợp lệ và không phải tường trong discovered_maze
-        if (newX >= 0 && newY >= 0 && newX < mazeSize && newY < mazeSize) {
-            if (maze[newX][newY] != WALL) {
-                agentPosition.setLocation(newX, newY);
-                takeAction = true;
-            }
+    
+        // Kiểm tra hợp lệ
+        if (newX >= 0 && newY >= 0 && newX < mazeSize && newY < mazeSize 
+                && maze[newX][newY] != WALL) {
+            
+            // Xóa vị trí cũ (set lại thành PATH)
+            maze[oldX][oldY] = PATH;
+            
+            // Cập nhật vị trí mới
+            agentPosition.setLocation(newX, newY);
+            maze[newX][newY] = AGENT_POSITION;
+            
+            return true;
         }
-        return takeAction;
+        return false;
     }
 
     /** 
@@ -317,9 +317,10 @@ public class Maze {
      * @return Mê cung hiện tại.
      */
     public int[][] getMaze() {
-        int[][] returnMaze = maze.clone();
-        returnMaze[agentPosition.x][agentPosition.y] = AGENT_POSITION; // Đánh dấu vị trí của tác tử
-        return returnMaze;  
+        // int[][] returnMaze = maze.clone();
+        // returnMaze[agentPosition.x][agentPosition.y] = AGENT_POSITION; // Đánh dấu vị trí của tác tử
+        // return returnMaze;  
+        return maze.clone();
     }
 
     /**

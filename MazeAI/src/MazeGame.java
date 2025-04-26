@@ -1,16 +1,13 @@
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import mazeai.MazePanel;
 
 public class MazeGame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            int rows = 30;
-            int cols = 30;
+            int mazeSize = 30;  // Changed from rows/cols to single size since maze is square
             int lightSize = 3;
-
-            new mazeai.MazeInterface(rows, cols, lightSize);
+            
+            // Initialize the interface with the maze environment
+            new mazeai.MazeInterface(mazeSize, lightSize);
         });
     }
 }

@@ -2,394 +2,182 @@ package mazeai;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.*;
+import java.util.Random;
+import mazenv.*;
 
-public class MazePanel extends JPanel implements KeyListener, MouseWheelListener, MouseListener, MouseMotionListener {
-    private int[][] maze;
-    private int rows, cols;
-    private int playerX = 0, playerY = 0;
-    private int goalX, goalY;
-    private int lightRadius;
-    private boolean fullView = false;
-    private boolean temporaryView = false;
-    private List<Point> currentPath = Collections.emptyList();
-    private ExecutorService pathfindingExecutor = Executors.newSingleThreadExecutor();
+/**
+ * Lớp hiển thị và quản lý giao diện đồ họa cho mê cung.
+ * <p>
+ * Lớp này kế thừa từ JPanel và chịu trách nhiệm vẽ mê cung, xử lý tương tác người dùng
+ * và hiển thị trạng thái hiện tại của trò chơi.
+ */
+public class MazePanel extends JPanel {
+    private int mazeSize;
     private float scale = 1.0f;
-    private Point lastDragPoint;
-    private Point viewOffset = new Point(0, 0);
-    private final int BASE_TILE_SIZE = 20;
-    private Image playerIcon;
+    private boolean fullView = false;
+    private int lightSize;
+    
+    private MazeEnv mazeEnv;
+    private SkillManager skillManager;
 
-    public MazePanel(int rows, int cols, int lightRadius) {
-        this.rows = rows;
-        this.cols = cols;
-        this.lightRadius = lightRadius;
-        try {
-            playerIcon = new ImageIcon(getClass().getResource("/mazeai/Icon/Robot.jpg")).getImage().getScaledInstance(BASE_TILE_SIZE - 4, BASE_TILE_SIZE - 4, Image.SCALE_SMOOTH);
-        } catch (Exception e) {
-            System.err.println("Không thể tải Robot.jpg");
-        }
-        generateNewMaze();
-        setFocusable(true);
-        addKeyListener(this);
-        addMouseWheelListener(this);
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        setOpaque(false);
+    /**
+     * Khởi tạo panel mê cung.
+     * @param mazeSize Kích thước mê cung (số ô mỗi chiều)
+     * @param lightSize Bán kính tầm nhìn của người chơi
+     * @param mazeEnv Đối tượng môi trường mê cung
+     */
+    public MazePanel(int mazeSize, int lightSize, MazeEnv mazeEnv) {
+        this.mazeSize = mazeSize;
+        this.lightSize = lightSize;
+        this.mazeEnv = mazeEnv;
+        this.skillManager = new SkillManager(mazeEnv);
+
+        setPreferredSize(new Dimension(800, 600));
+        adjustScaleToFit();
     }
 
-    public void generateNewMaze() {
-        maze = new int[rows][cols];
-        Random rand = new Random();
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                maze[i][j] = (rand.nextDouble() < 0.2) ? 1 : 0;
-            }
-        }
-        playerX = 0;
-        playerY = 0;
-        goalX = cols - 1;
-        goalY = rows - 1;
-        maze[playerY][playerX] = 0;
-        maze[goalY][goalX] = 0;
-        fullView = false;
-        temporaryView = false;
-        currentPath.clear();
-        scale = calculateInitialScale();
-        viewOffset.setLocation(0, 0);
+    /**
+     * Di chuyển người chơi theo hướng chỉ định.
+     * @param action Hướng di chuyển (sử dụng hằng số từ MazeEnv.Action)
+     */
+    public void movePlayer(int action) {
+        Pair<MazeState, Boolean> stepState = mazeEnv.step(action);
         repaint();
     }
 
-    private float calculateInitialScale() {
-        Container parent = getParent();
-        if (parent == null) return 1.0f;
-
-        int parentWidth = parent.getWidth();
-        int parentHeight = parent.getHeight();
-
-        float scaleX = (float) parentWidth / (cols * BASE_TILE_SIZE);
-        float scaleY = (float) parentHeight / (rows * BASE_TILE_SIZE);
-
-        return Math.max(0.1f, Math.min(Math.min(scaleX, scaleY), 10.0f));
+    /**
+     * Chuyển đổi giữa chế độ xem toàn bộ mê cung và chế độ xem thông thường.
+     */
+    public void toggleFullView() {
+        fullView = !fullView;
+        repaint();
     }
 
+    /**
+     * Kiểm tra có đang ở chế độ xem toàn bộ mê cung hay không.
+     * @return true nếu đang ở chế độ xem toàn bộ, false nếu ngược lại
+     */
+    public boolean isFullView() {
+        return fullView;
+    }
+
+    /**
+     * Điều chỉnh tỷ lệ hiển thị để mê cung vừa với kích thước panel.
+     */
     public void adjustScaleToFit() {
-        float newScale = calculateInitialScale();
-        if (Math.abs(newScale - scale) > 0.01f) {
-            scale = newScale;
-            revalidate();
-            repaint();
-        }
+        int width = getWidth();
+        int height = getHeight();
+        scale = Math.min((float) width / mazeSize, (float) height / mazeSize);
+        repaint();
     }
 
+    /**
+     * Tạo mê cung mới và reset trạng thái trò chơi.
+     */
+    public void generateNewMaze() {
+        mazeEnv.reset();
+        repaint();
+    }
+
+    /**
+     * Vẽ các thành phần của mê cung lên panel.
+     * @param g Đối tượng Graphics để vẽ
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-
-        g2d.translate(viewOffset.x, viewOffset.y);
-        g2d.scale(scale, scale);
-
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                boolean visible = fullView || temporaryView || isInLightRadius(col, row);
-
-                if (!visible) continue;
-
-                if (maze[row][col] == 1) {
-                    g2d.setColor(Color.BLACK);
-                } else {
-                    g2d.setColor(Color.WHITE);
-                }
-
-                g2d.fillRect(col * BASE_TILE_SIZE, row * BASE_TILE_SIZE, BASE_TILE_SIZE, BASE_TILE_SIZE);
-            }
-        }
-
-        // Vẽ lưới ô (dù là trong suốt hay không)
-        g2d.setColor(new Color(100, 100, 100, 200));
-        for (int r = 0; r <= rows; r++) {
-            g2d.drawLine(0, r * BASE_TILE_SIZE, cols * BASE_TILE_SIZE, r * BASE_TILE_SIZE);
-        }
-        for (int c = 0; c <= cols; c++) {
-            g2d.drawLine(c * BASE_TILE_SIZE, 0, c * BASE_TILE_SIZE, rows * BASE_TILE_SIZE);
-        }
-
-        if (!currentPath.isEmpty()) {
-            g2d.setColor(new Color(0, 200, 255, 150));
-            for (Point p : currentPath) {
-                g2d.fillRect(p.x * BASE_TILE_SIZE + 1, p.y * BASE_TILE_SIZE + 1,
-                        BASE_TILE_SIZE - 2, BASE_TILE_SIZE - 2);
-            }
-        }
-
-        g2d.setColor(Color.RED);
-        g2d.fillRect(goalX * BASE_TILE_SIZE + 1, goalY * BASE_TILE_SIZE + 1,
-                BASE_TILE_SIZE - 2, BASE_TILE_SIZE - 2);
-
-        if (playerIcon != null) {
-            g2d.drawImage(playerIcon, playerX * BASE_TILE_SIZE + 2, playerY * BASE_TILE_SIZE + 2, this);
-        } else {
-            g2d.setColor(Color.BLUE);
-            g2d.fillOval(playerX * BASE_TILE_SIZE + 2, playerY * BASE_TILE_SIZE + 2,
-                    BASE_TILE_SIZE - 4, BASE_TILE_SIZE - 4);
-        }
-
-        // Vẽ khung mê cung
-        g2d.setColor(Color.DARK_GRAY);
-        g2d.setStroke(new BasicStroke(2));
-        g2d.drawRect(0, 0, cols * BASE_TILE_SIZE, rows * BASE_TILE_SIZE);
-    }
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(
-            (int)(cols * BASE_TILE_SIZE * scale), 
-            (int)(rows * BASE_TILE_SIZE * scale)
-        );
-    }
-
-    public void movePlayer(int dx, int dy) {
-        int newX = playerX + dx;
-        int newY = playerY + dy;
-
-        if (canMove(newX, newY)) {
-            playerX = newX;
-            playerY = newY;
-            repaint();
-            checkGoal();
-        }
-    }
-
-    public void useSkill(String name) {
-        switch (name) {
-            case "Thiên lý nhãn":
-                temporaryView = true;
-                repaint();
-                new javax.swing.Timer(2000, e -> {
-                    temporaryView = false;
-                    repaint();
-                }).start();
-                break;
-                
-            case "Ánh sáng của Đảng":
-                lightRadius += 4;
-                repaint();
-                break;
-                
-            case "Slime thông thái":
-                findPathAsync();
-                break;
-                
-            case "Con đường vận mệnh":
-                createPathToGoal();
-                break;
-        }
-    }
-
-    private void findPathAsync() {
-        Future<?> future = pathfindingExecutor.submit(() -> {
-            List<Point> path = findPathAStar();
-            SwingUtilities.invokeLater(() -> {
-                currentPath = (path != null) ? path : Collections.emptyList();
-                repaint();
-                if (path == null) {
-                    JOptionPane.showMessageDialog(this, "Không tìm thấy đường đi!");
-                }
-            });
-        });
         
-        new javax.swing.Timer(5000, e -> {
-            if (!future.isDone()) {
-                future.cancel(true);
-                SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(this, 
-                        "Mê cung quá lớn, không thể tìm đường trong thời gian ngắn!");
-                });
-            }
-        }).start();
-    }
+        int cellWidth = (int)(scale);
+        int cellHeight = (int)(scale);
+        
+        // Lấy dữ liệu mê cung tùy theo chế độ xem
+        int[][] mazeData = fullView ? mazeEnv.getMaze() : mazeEnv.getDiscoveredMaze();
+        
+        // Tìm vị trí agent và đích trong dữ liệu mê cung
+        Point agentPos = findPosition(mazeData, Maze.AGENT_POSITION);
+        Point goalPos = findPosition(mazeData, Maze.GOAL);
 
-    private List<Point> findPathAStar() {
-        class Node implements Comparable<Node> {
-            Point point;
-            Node parent;
-            int g, h;
-
-            Node(Point point, Node parent, int g, int h) {
-                this.point = point;
-                this.parent = parent;
-                this.g = g;
-                this.h = h;
-            }
-
-            int f() { return g + h; }
-
-            @Override
-            public int compareTo(Node other) {
-                return Integer.compare(this.f(), other.f());
+        // Vẽ từng ô của mê cung
+        for (int row = 0; row < mazeSize; row++) {
+            for (int col = 0; col < mazeSize; col++) {
+                // Vẽ ô dựa trên loại của nó
+                switch (mazeData[row][col]) {
+                    case Maze.WALL:
+                        g2d.setColor(Color.BLACK);
+                        g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        break;
+                    case Maze.PATH:
+                        g2d.setColor(Color.WHITE);
+                        g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        break;
+                    case Maze.GOAL:
+                        g2d.setColor(Color.RED);
+                        g2d.fillOval(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        break;
+                    case Maze.AGENT_POSITION:
+                        g2d.setColor(Color.BLUE);
+                        g2d.fillOval(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        break;
+                    case Maze.UNEXPLORED:
+                        g2d.setColor(Color.DARK_GRAY);
+                        g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        break;
+                    default:
+                        // Đối với các đường đã khám phá
+                        if (mazeData[row][col] == 5 * Maze.PATH) {
+                            g2d.setColor(Color.LIGHT_GRAY);
+                            g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        }
+                        break;
+                }
+                
+                // Vẽ đường viền ô
+                g2d.setColor(Color.GRAY);
+                g2d.drawRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
             }
         }
+        
+        // Vẽ rõ vị trí agent và đích nếu tồn tại
+        if (agentPos != null) {
+            g2d.setColor(Color.BLUE);
+            g2d.fillOval(agentPos.y * cellWidth, agentPos.x * cellHeight, cellWidth, cellHeight);
+        }
+        
+        if (goalPos != null) {
+            g2d.setColor(Color.RED);
+            g2d.fillOval(goalPos.y * cellWidth, goalPos.x * cellHeight, cellWidth, cellHeight);
+        }
+    }
 
-        PriorityQueue<Node> openSet = new PriorityQueue<>();
-        Map<Point, Integer> gScore = new HashMap<>();
-        Set<Point> closedSet = new HashSet<>();
-
-        int h = Math.abs(playerX - goalX) + Math.abs(playerY - goalY);
-        Node startNode = new Node(new Point(playerX, playerY), null, 0, h);
-        openSet.add(startNode);
-        gScore.put(startNode.point, 0);
-
-        int[] dx = {0, 1, 0, -1};
-        int[] dy = {-1, 0, 1, 0};
-
-        while (!openSet.isEmpty()) {
-            if (Thread.currentThread().isInterrupted()) return null;
-            
-            Node current = openSet.poll();
-
-            if (current.point.x == goalX && current.point.y == goalY) {
-                List<Point> path = new ArrayList<>();
-                Node node = current;
-                while (node != null) {
-                    path.add(node.point);
-                    node = node.parent;
-                }
-                Collections.reverse(path);
-                return path;
-            }
-
-            closedSet.add(current.point);
-
-            for (int i = 0; i < 4; i++) {
-                int nx = current.point.x + dx[i];
-                int ny = current.point.y + dy[i];
-
-                if (!canMove(nx, ny)) continue;
-
-                Point neighbor = new Point(nx, ny);
-                if (closedSet.contains(neighbor)) continue;
-
-                int tentativeG = current.g + 1;
-                if (!gScore.containsKey(neighbor) || tentativeG < gScore.get(neighbor)) {
-                    int hScore = Math.abs(nx - goalX) + Math.abs(ny - goalY);
-                    Node neighborNode = new Node(neighbor, current, tentativeG, hScore);
-                    gScore.put(neighbor, tentativeG);
-                    openSet.add(neighborNode);
+    /**
+     * Tìm vị trí của một loại ô cụ thể trong mê cung.
+     * @param mazeData Dữ liệu mê cung
+     * @param target Loại ô cần tìm (sử dụng hằng số từ Maze)
+     * @return Vị trí của ô hoặc null nếu không tìm thấy
+     */
+    private Point findPosition(int[][] mazeData, int target) {
+        for (int row = 0; row < mazeData.length; row++) {
+            for (int col = 0; col < mazeData[row].length; col++) {
+                if (mazeData[row][col] == target) {
+                    return new Point(row, col);
                 }
             }
         }
         return null;
     }
 
-    private void checkGoal() {
-        if (playerX == goalX && playerY == goalY) {
-            JOptionPane.showMessageDialog(this, "🎉 Đã đến đích!");
-            generateNewMaze();
+    /**
+     * Sử dụng kỹ năng đặc biệt trong mê cung.
+     * @param skill Tên kỹ năng cần sử dụng
+     */
+    public void useSkill(String skill) {
+        System.out.println("Using skill: " + skill);
+        int[][] mazeData = mazeEnv.getMaze();
+        Point agentPos = findPosition(mazeData, Maze.AGENT_POSITION);
+        if (agentPos != null) {
+            skillManager.useSkill(skill, agentPos.x, agentPos.y);
         }
-    }
-
-    public void createPathToGoal() {
-        int x = playerX, y = playerY;
-        Random rand = new Random();
-        
-        while (x != goalX || y != goalY) {
-            maze[y][x] = 0;
-
-            int dx = goalX - x;
-            int dy = goalY - y;
-
-            if (Math.abs(dx) > Math.abs(dy)) {
-                x += Integer.compare(dx, 0);
-            } else if (dy != 0) {
-                y += Integer.compare(dy, 0);
-            } else {
-                x += Integer.compare(dx, 0);
-            }
-
-            if (x >= 0 && y >= 0 && x < cols && y < rows) {
-                maze[y][x] = 0;
-            }
-            
-            // Thêm ngẫu nhiên để tránh đường thẳng quá
-            if (rand.nextDouble() < 0.3) {
-                if (rand.nextBoolean() && x > 0) x--;
-                else if (x < cols - 1) x++;
-            }
-        }
-
-        maze[goalY][goalX] = 0;
-        repaint();
-        JOptionPane.showMessageDialog(this, "✨ 'Con đường vận mệnh' đã mở đường thành công!");
-    }
-
-    public void toggleFullView() {
-        fullView = !fullView;
         repaint();
     }
-
-    public boolean isFullView() {
-        return fullView;
-    }
-
-    private boolean canMove(int x, int y) {
-        return x >= 0 && y >= 0 && x < cols && y < rows && maze[y][x] == 0;
-    }
-
-    private boolean isInLightRadius(int x, int y) {
-        int r = lightRadius / 2;
-        return Math.abs(playerX - x) <= r && Math.abs(playerY - y) <= r;
-    }
-
-    // Xử lý phím
-    @Override
-    public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_UP: movePlayer(0, -1); break;
-            case KeyEvent.VK_DOWN: movePlayer(0, 1); break;
-            case KeyEvent.VK_LEFT: movePlayer(-1, 0); break;
-            case KeyEvent.VK_RIGHT: movePlayer(1, 0); break;
-            case KeyEvent.VK_F: toggleFullView(); break;
-            case KeyEvent.VK_EQUALS: case KeyEvent.VK_PLUS:
-                scale *= 1.1f; revalidate(); repaint(); break;
-            case KeyEvent.VK_MINUS:
-                scale *= 0.9f; revalidate(); repaint(); break;
-            case KeyEvent.VK_ESCAPE: generateNewMaze(); break;
-        }
-    }
-
-    // Xử lý chuột
-    @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
-        float scaleFactor = e.getWheelRotation() < 0 ? 1.1f : 0.9f;
-        scale *= scaleFactor;
-        revalidate();
-        repaint();
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        lastDragPoint = e.getPoint();
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        Point current = e.getPoint();
-        int dx = current.x - lastDragPoint.x;
-        int dy = current.y - lastDragPoint.y;
-        viewOffset.translate(dx, dy);
-        lastDragPoint = current;
-        repaint();
-    }
-
-    // Các sự kiện không dùng tới
-    @Override public void mouseReleased(MouseEvent e) {}
-    @Override public void mouseMoved(MouseEvent e) {}
-    @Override public void mouseClicked(MouseEvent e) {}
-    @Override public void mouseEntered(MouseEvent e) {}
-    @Override public void mouseExited(MouseEvent e) {}
-    @Override public void keyTyped(KeyEvent e) {}
-    @Override public void keyReleased(KeyEvent e) {}
 }
