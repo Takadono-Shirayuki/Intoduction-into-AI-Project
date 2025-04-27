@@ -2,7 +2,6 @@ package mazeai;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Random;
 import mazenv.*;
 
 /**
@@ -97,7 +96,7 @@ public class MazePanel extends JPanel {
         // Tìm vị trí agent và đích trong dữ liệu mê cung
         Point agentPos = findPosition(mazeData, Maze.AGENT_POSITION);
         Point goalPos = findPosition(mazeData, Maze.GOAL);
-
+        
         // Vẽ từng ô của mê cung
         for (int row = 0; row < mazeSize; row++) {
             for (int col = 0; col < mazeSize; col++) {

@@ -78,8 +78,12 @@ public class MazeEnv {
     public int maxStep;
     
     public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep) {
+        this(mazeSize, maxStep, pathPercent, slimeStep, false);
+    }
+
+    public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep, boolean hellMode) {
         this.maze = new Maze(mazeSize, pathPercent);
-        this.discoveredMaze = new DiscoveredMaze(mazeSize);
+        this.discoveredMaze = new DiscoveredMaze(mazeSize, maze.getDiscoverData(3), hellMode);
         this.maxStep = maxStep;
         this.slimeStep = slimeStep;
     }
@@ -170,7 +174,7 @@ public class MazeEnv {
         int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
         discoveredMaze.discoverMaze(mazeData);
         
-        return new MazeState(discoveredMaze.getDiscoveredMaze(),
+        return new MazeState(discoveredMaze.getDiscoveredMaze(maze.getAgentPosition()),
                 maze.getAgentPosition(),
                 maze.getGoalPosition(),
                 false);
@@ -192,7 +196,7 @@ public class MazeEnv {
         int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
         discoveredMaze.discoverMaze(mazeData);
         boolean success = maze.isGoal();
-        MazeState state = new MazeState(discoveredMaze.getDiscoveredMaze(),
+        MazeState state = new MazeState(discoveredMaze.getDiscoveredMaze(agentPos),
                 agentPos,
                 maze.getGoalPosition(),
                 success);
@@ -240,6 +244,6 @@ public class MazeEnv {
      * @return Ma trận đã khám phá.
      */
     public int[][] getDiscoveredMaze() {
-        return discoveredMaze.getDiscoveredMaze();
+        return discoveredMaze.getDiscoveredMaze(maze.getAgentPosition());
     }
 }
