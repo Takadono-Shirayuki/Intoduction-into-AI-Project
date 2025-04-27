@@ -1,4 +1,4 @@
-package mazeai;
+package mazeinterface;
 
 import javax.swing.*;
 import mazenv.*;
@@ -17,9 +17,9 @@ public class MazeInterface {
     private Map<String, JLabel> skillLabels = new HashMap<>();
     private MazeEnv mazeEnv;
 
-    public MazeInterface(int mazeSize, int lightSize) {
+    public MazeInterface(int mazeSize) {
         // Initialize MazeEnv first
-        this.mazeEnv = new MazeEnv(mazeSize, 1000, 70, 5); // Example parameters
+        this.mazeEnv = new MazeEnv(mazeSize, 15, 70, 50); // Example parameters
         
         frame = new JFrame("\uD83C\uDF00 Mê cung vô vọng - ver 1.1");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,7 +42,7 @@ public class MazeInterface {
         }
 
         // Initialize MazePanel with the MazeEnv instance
-        mazePanel = new MazePanel(mazeSize, lightSize, mazeEnv);
+        mazePanel = new MazePanel(mazeSize, mazeEnv);
 
         // Initialize skill counts
         skillCounts.put("Thiên lý nhãn", 5);    // Corresponds to SENRIGAN

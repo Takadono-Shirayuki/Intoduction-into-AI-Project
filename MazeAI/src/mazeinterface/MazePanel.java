@@ -1,4 +1,4 @@
-package mazeai;
+package mazeinterface;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,8 +14,7 @@ public class MazePanel extends JPanel {
     private int mazeSize;
     private float scale = 1.0f;
     private boolean fullView = false;
-    private int lightSize;
-    
+
     private MazeEnv mazeEnv;
     private SkillManager skillManager;
 
@@ -25,9 +24,8 @@ public class MazePanel extends JPanel {
      * @param lightSize Bán kính tầm nhìn của người chơi
      * @param mazeEnv Đối tượng môi trường mê cung
      */
-    public MazePanel(int mazeSize, int lightSize, MazeEnv mazeEnv) {
+    public MazePanel(int mazeSize, MazeEnv mazeEnv) {
         this.mazeSize = mazeSize;
-        this.lightSize = lightSize;
         this.mazeEnv = mazeEnv;
         this.skillManager = new SkillManager(mazeEnv);
 
@@ -93,10 +91,6 @@ public class MazePanel extends JPanel {
         // Lấy dữ liệu mê cung tùy theo chế độ xem
         int[][] mazeData = fullView ? mazeEnv.getMaze() : mazeEnv.getDiscoveredMaze();
         
-        // Tìm vị trí agent và đích trong dữ liệu mê cung
-        Point agentPos = findPosition(mazeData, Maze.AGENT_POSITION);
-        Point goalPos = findPosition(mazeData, Maze.GOAL);
-        
         // Vẽ từng ô của mê cung
         for (int row = 0; row < mazeSize; row++) {
             for (int col = 0; col < mazeSize; col++) {
@@ -136,34 +130,6 @@ public class MazePanel extends JPanel {
                 g2d.drawRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
             }
         }
-        
-        // Vẽ rõ vị trí agent và đích nếu tồn tại
-        if (agentPos != null) {
-            g2d.setColor(Color.BLUE);
-            g2d.fillOval(agentPos.y * cellWidth, agentPos.x * cellHeight, cellWidth, cellHeight);
-        }
-        
-        if (goalPos != null) {
-            g2d.setColor(Color.RED);
-            g2d.fillOval(goalPos.y * cellWidth, goalPos.x * cellHeight, cellWidth, cellHeight);
-        }
-    }
-
-    /**
-     * Tìm vị trí của một loại ô cụ thể trong mê cung.
-     * @param mazeData Dữ liệu mê cung
-     * @param target Loại ô cần tìm (sử dụng hằng số từ Maze)
-     * @return Vị trí của ô hoặc null nếu không tìm thấy
-     */
-    private Point findPosition(int[][] mazeData, int target) {
-        for (int row = 0; row < mazeData.length; row++) {
-            for (int col = 0; col < mazeData[row].length; col++) {
-                if (mazeData[row][col] == target) {
-                    return new Point(row, col);
-                }
-            }
-        }
-        return null;
     }
 
     /**
@@ -172,8 +138,7 @@ public class MazePanel extends JPanel {
      */
     public void useSkill(String skill) {
         System.out.println("Using skill: " + skill);
-        int[][] mazeData = mazeEnv.getMaze();
-        Point agentPos = findPosition(mazeData, Maze.AGENT_POSITION);
+        Point agentPos = mazeEnv.getAgentPosition();
         if (agentPos != null) {
             skillManager.useSkill(skill, agentPos.x, agentPos.y);
         }

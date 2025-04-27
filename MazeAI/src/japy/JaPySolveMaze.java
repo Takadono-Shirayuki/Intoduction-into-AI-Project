@@ -1,6 +1,6 @@
-package mazeai.japy;
+package japy;
 
-import mazeai.MazePanel;
+import mazeinterface.MazePanel;
 public class JaPySolveMaze {
     private JaPy jaPy;
     private MazePanel mazePanel;

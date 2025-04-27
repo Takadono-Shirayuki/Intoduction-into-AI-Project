@@ -1,4 +1,4 @@
-package mazeai;
+package mazeinterface;
 import mazenv.*;
 
 public class SkillManager {

@@ -246,4 +246,11 @@ public class MazeEnv {
     public int[][] getDiscoveredMaze() {
         return discoveredMaze.getDiscoveredMaze(maze.getAgentPosition());
     }
+
+    /**
+     * Lấy vị trí của tác tử trong mê cung.
+     */
+    public Point getAgentPosition() {
+        return maze.getAgentPosition();
+    }
 }

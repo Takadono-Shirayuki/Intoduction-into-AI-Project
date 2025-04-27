@@ -1,4 +1,4 @@
-package mazeai.japy;
+package japy;
 
 import mazenv.Maze;
 import mazenv.Pair;
