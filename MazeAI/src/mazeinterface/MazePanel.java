@@ -134,14 +134,10 @@ public class MazePanel extends JPanel {
 
     /**
      * Sử dụng kỹ năng đặc biệt trong mê cung.
-     * @param skill Tên kỹ năng cần sử dụng
+     * @param skill Kỹ năng cần sử dụng (sử dụng hằng số từ lớp Buff)
      */
-    public void useSkill(String skill) {
-        System.out.println("Using skill: " + skill);
-        Point agentPos = mazeEnv.getAgentPosition();
-        if (agentPos != null) {
-            skillManager.useSkill(skill, agentPos.x, agentPos.y);
-        }
+    public void useSkill(int skill) {
+        mazeEnv.regenerateMaze(skill, MazeEnv.Debuff.NONE);
         repaint();
     }
 }

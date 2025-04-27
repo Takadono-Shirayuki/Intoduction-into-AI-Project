@@ -2,6 +2,8 @@ package mazeinterface;
 
 import javax.swing.*;
 import mazenv.*;
+import mazenv.MazeEnv.Buff;
+
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,10 +89,10 @@ public class MazeInterface {
         JPanel skillPanel = new JPanel(new GridLayout(1, 4, 10, 10));
         skillPanel.setOpaque(false);
         skillPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        skillPanel.add(createSkillButtonWithIcon("Thiên lý nhãn", "Icon/Thien_Ly_Nhan.jpg"));
-        skillPanel.add(createSkillButtonWithIcon("Slime thông thái", "Icon/Slime_Thong_Thai.jpg"));
-        skillPanel.add(createSkillButtonWithIcon("Ánh sáng của Đảng", "Icon/Anh_Sang.jpg"));
-        skillPanel.add(createSkillButtonWithIcon("Con đường vận mệnh", "Icon/Con_Duong.jpg"));
+        skillPanel.add(createSkillButtonWithIcon("Thiên lý nhãn", "Icon/Thien_Ly_Nhan.jpg", Buff.SENRIGAN));
+        skillPanel.add(createSkillButtonWithIcon("Slime thông thái", "Icon/Slime_Thong_Thai.jpg", Buff.SLIME_SAN_ONEGAI));
+        skillPanel.add(createSkillButtonWithIcon("Ánh sáng của Đảng", "Icon/Anh_Sang.jpg", Buff.TOU_NO_HIKARI));
+        skillPanel.add(createSkillButtonWithIcon("Con đường vận mệnh", "Icon/Con_Duong.jpg", Buff.UNMEI_NO_MICHI));
 
         frame.add(skillPanel, BorderLayout.SOUTH);
 
@@ -137,7 +139,7 @@ public class MazeInterface {
         return btn;
     }
 
-    private JPanel createSkillButtonWithIcon(String skillName, String iconFileName) {
+    private JPanel createSkillButtonWithIcon(String skillName, String iconFileName, int skill) {
         JPanel panel = new JPanel(new BorderLayout());
         ImageIcon icon = createRoundedIcon(iconFileName, 64);
 
@@ -152,7 +154,7 @@ public class MazeInterface {
         btn.addActionListener(e -> {
             int count = skillCounts.getOrDefault(skillName, 0);
             if (count > 0) {
-                mazePanel.useSkill(skillName);
+                mazePanel.useSkill(skill);
                 skillCounts.put(skillName, count - 1);
                 countLabel.setText("x" + (count - 1));
             } else {
