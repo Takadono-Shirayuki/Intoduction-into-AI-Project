@@ -21,7 +21,7 @@ public class MazeInterface {
 
     public MazeInterface(int mazeSize) {
         // Initialize MazeEnv first
-        this.mazeEnv = new MazeEnv(mazeSize, 15, 70, 50); // Example parameters
+        this.mazeEnv = new MazeEnv(mazeSize, 15, 70, 100); // Example parameters
         
         frame = new JFrame("\uD83C\uDF00 Mê cung vô vọng - ver 1.1");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

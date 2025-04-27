@@ -16,7 +16,6 @@ public class MazePanel extends JPanel {
     private boolean fullView = false;
 
     private MazeEnv mazeEnv;
-    private SkillManager skillManager;
 
     /**
      * Khởi tạo panel mê cung.
@@ -27,7 +26,6 @@ public class MazePanel extends JPanel {
     public MazePanel(int mazeSize, MazeEnv mazeEnv) {
         this.mazeSize = mazeSize;
         this.mazeEnv = mazeEnv;
-        this.skillManager = new SkillManager(mazeEnv);
 
         setPreferredSize(new Dimension(800, 600));
         adjustScaleToFit();
@@ -40,6 +38,12 @@ public class MazePanel extends JPanel {
     public void movePlayer(int action) {
         Pair<MazeState, Boolean> stepState = mazeEnv.step(action);
         repaint();
+        if (stepState.getItem1().success == true)
+        {
+            JOptionPane.showMessageDialog(this, "Đã tìm thấy đường đi đến đích!");
+            mazeEnv.reset();
+            repaint();
+        }
     }
 
     /**

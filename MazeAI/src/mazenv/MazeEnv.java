@@ -167,8 +167,8 @@ public class MazeEnv {
             case Buff.SLIME_SAN_ONEGAI:
                 discoveredMaze.discoverMaze(maze.activateSlimeBuff(slimeStep));
                 break;
-            default:
-                discoveredMaze.discoverMaze(maze.getDiscoverData(10));
+            case Buff.TOU_NO_HIKARI:
+                discoveredMaze.discoverMaze(maze.getDiscoverData(8));
                 break;
         }
         int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
