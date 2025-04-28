@@ -2,13 +2,14 @@ package mazeinterface;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import mazenv.*;
 
 /**
  * Lớp hiển thị và quản lý giao diện đồ họa cho mê cung.
  * <p>
- * Lớp này kế thừa từ JPanel và chịu trách nhiệm vẽ mê cung, xử lý tương tác người dùng
- * và hiển thị trạng thái hiện tại của trò chơi.
+ * Bao gồm: vẽ mê cung, di chuyển người chơi bằng bàn phím, xử lý tầm nhìn và cập nhật khám phá.
  */
 public class MazePanel extends JPanel {
     private int mazeSize;
@@ -20,7 +21,6 @@ public class MazePanel extends JPanel {
     /**
      * Khởi tạo panel mê cung.
      * @param mazeSize Kích thước mê cung (số ô mỗi chiều)
-     * @param lightSize Bán kính tầm nhìn của người chơi
      * @param mazeEnv Đối tượng môi trường mê cung
      */
     public MazePanel(int mazeSize, MazeEnv mazeEnv) {
@@ -29,17 +29,51 @@ public class MazePanel extends JPanel {
 
         setPreferredSize(new Dimension(800, 600));
         adjustScaleToFit();
+
+        // Thiết lập để nhận sự kiện phím
+        setFocusable(true);
+        requestFocusInWindow();
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                handleKeyPress(e);
+            }
+        });
+    }
+
+    /**
+     * Xử lý sự kiện phím bấm để di chuyển người chơi.
+     * @param e Sự kiện KeyEvent
+     */
+    private void handleKeyPress(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        switch (keyCode) {
+            case KeyEvent.VK_UP:
+                movePlayer(MazeEnv.Action.UP);
+                break;
+            case KeyEvent.VK_DOWN:
+                movePlayer(MazeEnv.Action.DOWN);
+                break;
+            case KeyEvent.VK_LEFT:
+                movePlayer(MazeEnv.Action.LEFT);
+                break;
+            case KeyEvent.VK_RIGHT:
+                movePlayer(MazeEnv.Action.RIGHT);
+                break;
+            default:
+                break;
+        }
     }
 
     /**
      * Di chuyển người chơi theo hướng chỉ định.
-     * @param action Hướng di chuyển (sử dụng hằng số từ MazeEnv.Action)
+     * @param action Hướng di chuyển (MazeEnv.Action)
      */
     public void movePlayer(int action) {
         Pair<MazeState, Boolean> stepState = mazeEnv.step(action);
+
         repaint();
-        if (stepState.getItem1().success == true)
-        {
+        if (stepState.getItem1().success == true) {
             JOptionPane.showMessageDialog(this, "Đã tìm thấy đường đi đến đích!");
             mazeEnv.reset();
             repaint();
@@ -47,7 +81,7 @@ public class MazePanel extends JPanel {
     }
 
     /**
-     * Chuyển đổi giữa chế độ xem toàn bộ mê cung và chế độ xem thông thường.
+     * Chuyển đổi giữa chế độ xem toàn bộ mê cung và chế độ xem theo tầm nhìn người chơi.
      */
     public void toggleFullView() {
         fullView = !fullView;
@@ -55,15 +89,15 @@ public class MazePanel extends JPanel {
     }
 
     /**
-     * Kiểm tra có đang ở chế độ xem toàn bộ mê cung hay không.
-     * @return true nếu đang ở chế độ xem toàn bộ, false nếu ngược lại
+     * Kiểm tra chế độ xem toàn bộ mê cung.
+     * @return true nếu đang xem toàn bộ, false nếu chỉ xem tầm nhìn.
      */
     public boolean isFullView() {
         return fullView;
     }
 
     /**
-     * Điều chỉnh tỷ lệ hiển thị để mê cung vừa với kích thước panel.
+     * Điều chỉnh tỷ lệ hiển thị sao cho mê cung vừa với kích thước panel.
      */
     public void adjustScaleToFit() {
         int width = getWidth();
@@ -82,23 +116,22 @@ public class MazePanel extends JPanel {
 
     /**
      * Vẽ các thành phần của mê cung lên panel.
-     * @param g Đối tượng Graphics để vẽ
+     * @param g Đối tượng Graphics
      */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        
+
         int cellWidth = (int)(scale);
         int cellHeight = (int)(scale);
-        
-        // Lấy dữ liệu mê cung tùy theo chế độ xem
+
+        // Lấy dữ liệu mê cung (toàn bộ hoặc chỉ phần đã khám phá)
         int[][] mazeData = fullView ? mazeEnv.getMaze() : mazeEnv.getDiscoveredMaze();
-        
-        // Vẽ từng ô của mê cung
+
         for (int row = 0; row < mazeSize; row++) {
             for (int col = 0; col < mazeSize; col++) {
-                // Vẽ ô dựa trên loại của nó
+                // Chọn màu sắc và vẽ từng ô
                 switch (mazeData[row][col]) {
                     case Maze.WALL:
                         g2d.setColor(Color.BLACK);
@@ -121,15 +154,14 @@ public class MazePanel extends JPanel {
                         g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                         break;
                     default:
-                        // Đối với các đường đã khám phá
                         if (mazeData[row][col] == 5 * Maze.PATH) {
                             g2d.setColor(Color.LIGHT_GRAY);
                             g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                         }
                         break;
                 }
-                
-                // Vẽ đường viền ô
+
+                // Vẽ viền ô
                 g2d.setColor(Color.GRAY);
                 g2d.drawRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
             }
@@ -138,10 +170,11 @@ public class MazePanel extends JPanel {
 
     /**
      * Sử dụng kỹ năng đặc biệt trong mê cung.
-     * @param skill Kỹ năng cần sử dụng (sử dụng hằng số từ lớp Buff)
+     * @param skill Kỹ năng sử dụng (theo hằng số trong lớp Buff)
      */
     public void useSkill(int skill) {
         mazeEnv.regenerateMaze(skill, MazeEnv.Debuff.NONE);
-        repaint();
+        //repaint();
+        requestFocusInWindow();  // Gọi lại để đảm bảo nhận sự kiện từ bàn phím
     }
 }
