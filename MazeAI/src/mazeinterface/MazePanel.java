@@ -122,48 +122,58 @@ public class MazePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-
+    
         int cellWidth = (int)(scale);
         int cellHeight = (int)(scale);
-
+    
+        int mazePixelWidth = mazeSize * cellWidth;
+        int mazePixelHeight = mazeSize * cellHeight;
+    
+        // Tính offset căn giữa mê cung
+        int offsetX = (getWidth() - mazePixelWidth) / 2;
+        int offsetY = (getHeight() - mazePixelHeight) / 2;
+    
         // Lấy dữ liệu mê cung (toàn bộ hoặc chỉ phần đã khám phá)
         int[][] mazeData = fullView ? mazeEnv.getMaze() : mazeEnv.getDiscoveredMaze();
-
+    
         for (int row = 0; row < mazeSize; row++) {
             for (int col = 0; col < mazeSize; col++) {
+                int drawX = offsetX + col * cellWidth;
+                int drawY = offsetY + row * cellHeight;
+    
                 // Chọn màu sắc và vẽ từng ô
                 switch (mazeData[row][col]) {
                     case Maze.WALL:
                         g2d.setColor(Color.BLACK);
-                        g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
                         break;
                     case Maze.PATH:
                         g2d.setColor(Color.WHITE);
-                        g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
                         break;
                     case Maze.GOAL:
                         g2d.setColor(Color.RED);
-                        g2d.fillOval(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        g2d.fillOval(drawX, drawY, cellWidth, cellHeight);
                         break;
                     case Maze.AGENT_POSITION:
                         g2d.setColor(Color.BLUE);
-                        g2d.fillOval(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        g2d.fillOval(drawX, drawY, cellWidth, cellHeight);
                         break;
                     case Maze.UNEXPLORED:
                         g2d.setColor(Color.DARK_GRAY);
-                        g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
                         break;
                     default:
                         if (mazeData[row][col] == 5 * Maze.PATH) {
                             g2d.setColor(Color.LIGHT_GRAY);
-                            g2d.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                            g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
                         }
                         break;
                 }
-
+    
                 // Vẽ viền ô
                 g2d.setColor(Color.GRAY);
-                g2d.drawRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                g2d.drawRect(drawX, drawY, cellWidth, cellHeight);
             }
         }
     }

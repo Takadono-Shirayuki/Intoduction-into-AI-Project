@@ -1,33 +1,26 @@
 package mazeinterface;
 
 import javax.swing.*;
-import mazenv.*;
-import mazenv.MazeEnv.Buff;
-
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-
+import mazenv.*;
 
 public class MazeInterface {
     private JFrame frame;
     private MazePanel mazePanel;
+    private MazeEnv mazeEnv;
     private Map<String, Integer> skillCounts = new HashMap<>();
     private Map<String, JLabel> skillLabels = new HashMap<>();
-    private MazeEnv mazeEnv;
 
-    public MazeInterface(int mazeSize) {
-        // Initialize MazeEnv first
-        this.mazeEnv = new MazeEnv(mazeSize, 15, 70, 100); // Example parameters
-        
-        frame = new JFrame("\uD83C\uDF00 Mê cung vô vọng - ver 1.1");
+    public MazeInterface(int mazeSize, int lightSize) {
+        frame = new JFrame("\uD83C\uDF00 Mê cung vô vọng - ver 1.2");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        // Create background
         try {
             ImageIcon bgIcon = new ImageIcon(getClass().getResource("/mazeai/Icon/Background.jpg"));
             Image bgImage = bgIcon.getImage();
@@ -43,22 +36,19 @@ public class MazeInterface {
             System.err.println("Không thể tải background");
         }
 
-        // Initialize MazePanel with the MazeEnv instance
+        mazeEnv = new MazeEnv(mazeSize, 50, 50, 5);
         mazePanel = new MazePanel(mazeSize, mazeEnv);
 
-        // Initialize skill counts
-        skillCounts.put("Thiên lý nhãn", 5);    // Corresponds to SENRIGAN
-        skillCounts.put("Slime thông thái", 5); // Corresponds to SLIME_SAN_ONEGAI
-        skillCounts.put("Ánh sáng của Đảng", 5); // Corresponds to TOU_NO_HIKARI
-        skillCounts.put("Con đường vận mệnh", 5); // Corresponds to UNMEI_NO_MICHI
+        skillCounts.put("Thiên lý nhãn", 5);
+        skillCounts.put("Slime thông thái", 5);
+        skillCounts.put("Ánh sáng của Đảng", 5);
+        skillCounts.put("Con đường vận mệnh", 5);
 
-        // Maze container
         JPanel container = new JPanel(new GridBagLayout());
         container.setOpaque(false);
         container.add(mazePanel);
         frame.add(container, BorderLayout.CENTER);
 
-        // Movement control panel
         JPanel movePanel = new JPanel(new GridBagLayout());
         movePanel.setOpaque(false);
         GridBagConstraints c = new GridBagConstraints();
@@ -67,12 +57,6 @@ public class MazeInterface {
         JButton down = createArrowButton("↓");
         JButton left = createArrowButton("←");
         JButton right = createArrowButton("→");
-
-        // Add action listeners for movement
-        up.addActionListener(e -> mazePanel.movePlayer(MazeEnv.Action.UP));
-        down.addActionListener(e -> mazePanel.movePlayer(MazeEnv.Action.DOWN));
-        left.addActionListener(e -> mazePanel.movePlayer(MazeEnv.Action.LEFT));
-        right.addActionListener(e -> mazePanel.movePlayer(MazeEnv.Action.RIGHT));
 
         c.gridx = 1; c.gridy = 0;
         movePanel.add(up, c);
@@ -83,38 +67,33 @@ public class MazeInterface {
         c.gridx = 2; c.gridy = 1;
         movePanel.add(right, c);
 
+        up.addActionListener(e -> mazePanel.movePlayer(MazeEnv.Action.UP));
+        down.addActionListener(e -> mazePanel.movePlayer(MazeEnv.Action.DOWN));
+        left.addActionListener(e -> mazePanel.movePlayer(MazeEnv.Action.LEFT));
+        right.addActionListener(e -> mazePanel.movePlayer(MazeEnv.Action.RIGHT));
+
         frame.add(movePanel, BorderLayout.EAST);
 
-        // Skill panel
-        JPanel skillPanel = new JPanel(new GridLayout(1, 4, 10, 10));
-        skillPanel.setOpaque(false);
-        skillPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        skillPanel.add(createSkillButtonWithIcon("Thiên lý nhãn", "Icon/Thien_Ly_Nhan.jpg", Buff.SENRIGAN));
-        skillPanel.add(createSkillButtonWithIcon("Slime thông thái", "Icon/Slime_Thong_Thai.jpg", Buff.SLIME_SAN_ONEGAI));
-        skillPanel.add(createSkillButtonWithIcon("Ánh sáng của Đảng", "Icon/Anh_Sang.jpg", Buff.TOU_NO_HIKARI));
-        skillPanel.add(createSkillButtonWithIcon("Con đường vận mệnh", "Icon/Con_Duong.jpg", Buff.UNMEI_NO_MICHI));
-
-        frame.add(skillPanel, BorderLayout.SOUTH);
-
-        // Settings button
-        JPanel topLeftPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel topLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topLeftPanel.setOpaque(false);
+
+        JButton skillMenuBtn = new JButton("\uD83C\uDFAF Skill");
+        skillMenuBtn.setPreferredSize(new Dimension(120, 40));
+        skillMenuBtn.addActionListener(e -> openSkillDialog());
+        topLeftPanel.add(skillMenuBtn);
+
         JButton settingBtn = new JButton("⚙");
+        settingBtn.setPreferredSize(new Dimension(50, 40));
         JPopupMenu settingMenu = new JPopupMenu();
-        
-        JMenuItem retryItem = new JMenuItem("Retry");
-        retryItem.addActionListener(e -> mazePanel.generateNewMaze());
-        settingMenu.add(retryItem);
-        
+        settingMenu.add(new JMenuItem("Retry"));
         settingMenu.add(new JMenuItem("Load"));
         settingMenu.add(new JMenuItem("Save"));
         settingMenu.add(new JMenuItem("Home"));
-        
         settingBtn.addActionListener(e -> settingMenu.show(settingBtn, 0, settingBtn.getHeight()));
         topLeftPanel.add(settingBtn);
+
         frame.add(topLeftPanel, BorderLayout.NORTH);
 
-        // Resize handler
         frame.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent e) {
                 mazePanel.adjustScaleToFit();
@@ -139,12 +118,27 @@ public class MazeInterface {
         return btn;
     }
 
-    private JPanel createSkillButtonWithIcon(String skillName, String iconFileName, int skill) {
+    private void openSkillDialog() {
+        JDialog skillDialog = new JDialog(frame, "Chọn Kỹ năng", true);
+        skillDialog.setLayout(new GridLayout(2, 2, 10, 10));
+
+        skillDialog.add(createSkillButtonWithIcon("Thiên lý nhãn", "Icon/Thien_Ly_Nhan.jpg", MazeEnv.Buff.SENRIGAN));
+        skillDialog.add(createSkillButtonWithIcon("Slime thông thái", "Icon/Slime_Thong_Thai.jpg", MazeEnv.Buff.SLIME_SAN_ONEGAI));
+        skillDialog.add(createSkillButtonWithIcon("Ánh sáng của Đảng", "Icon/Anh_Sang.jpg", MazeEnv.Buff.TOU_NO_HIKARI));
+        skillDialog.add(createSkillButtonWithIcon("Con đường vận mệnh", "Icon/Con_Duong.jpg", MazeEnv.Buff.UNMEI_NO_MICHI));
+
+        skillDialog.pack();
+        skillDialog.setLocationRelativeTo(frame);
+        skillDialog.setVisible(true);
+    }
+
+    private JPanel createSkillButtonWithIcon(String skillName, String iconFileName, int skillBuff) {
         JPanel panel = new JPanel(new BorderLayout());
+
         ImageIcon icon = createRoundedIcon(iconFileName, 64);
 
         JButton btn = new JButton();
-        btn.setPreferredSize(new Dimension(80, 80));
+        btn.setPreferredSize(new Dimension(100, 100));
         if (icon != null) btn.setIcon(icon);
         btn.setToolTipText(skillName);
 
@@ -154,13 +148,16 @@ public class MazeInterface {
         btn.addActionListener(e -> {
             int count = skillCounts.getOrDefault(skillName, 0);
             if (count > 0) {
-                mazePanel.useSkill(skill);
+                mazePanel.useSkill(skillBuff);
+                mazePanel.repaint();
+                mazePanel.requestFocusInWindow();
                 skillCounts.put(skillName, count - 1);
                 countLabel.setText("x" + (count - 1));
             } else {
                 JOptionPane.showMessageDialog(frame, "Bạn đã hết kỹ năng: " + skillName);
             }
         });
+        
 
         panel.add(btn, BorderLayout.CENTER);
         panel.add(countLabel, BorderLayout.SOUTH);
