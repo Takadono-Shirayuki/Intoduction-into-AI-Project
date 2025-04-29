@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import mazenv.*;
+import mazenv.MazeEnv.Buff;
 
 public class MazeInterface {
     private JFrame frame;
@@ -36,7 +37,7 @@ public class MazeInterface {
             System.err.println("Không thể tải background");
         }
 
-        mazeEnv = new MazeEnv(mazeSize, 50, 50, 5);
+        mazeEnv = new MazeEnv(mazeSize, 15, 50, Buff.SLIME_STEP, Buff.TOU_NO_HIKARI_OBS);
         mazePanel = new MazePanel(mazeSize, mazeEnv);
 
         skillCounts.put("Thiên lý nhãn", 5);
