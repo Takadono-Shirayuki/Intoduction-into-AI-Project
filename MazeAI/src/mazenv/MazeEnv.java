@@ -48,6 +48,9 @@ public class MazeEnv {
          * Buff tìm kiếm đường có thể đi xung quanh tác tử.
          */
         public static final int SLIME_SAN_ONEGAI = 4;
+
+        public static final int SLIME_STEP = 100;
+        public static final int TOU_NO_HIKARI_OBS = 8;
     }
 
     /**
@@ -75,17 +78,19 @@ public class MazeEnv {
     private DiscoveredMaze discoveredMaze;
     private boolean senriganBuff = false;
     private int slimeStep;
+    private int touNoHikariObs;
     public int maxStep;
     
-    public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep) {
-        this(mazeSize, maxStep, pathPercent, slimeStep, false);
+    public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep, int touNoHikariObs) {
+        this(mazeSize, maxStep, pathPercent, slimeStep, touNoHikariObs, false);
     }
 
-    public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep, boolean hellMode) {
+    public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep, int touNoHikariObs, boolean hellMode) {
         this.maze = new Maze(mazeSize, pathPercent);
         this.discoveredMaze = new DiscoveredMaze(mazeSize, maze.getDiscoverData(3), hellMode);
         this.maxStep = maxStep;
         this.slimeStep = slimeStep;
+        this.touNoHikariObs = touNoHikariObs;
     }
 
     public void createDataSet(String path) {
@@ -168,7 +173,7 @@ public class MazeEnv {
                 discoveredMaze.discoverMaze(maze.activateSlimeBuff(slimeStep));
                 break;
             case Buff.TOU_NO_HIKARI:
-                discoveredMaze.discoverMaze(maze.getDiscoverData(8));
+                discoveredMaze.discoverMaze(maze.getDiscoverData(touNoHikariObs));
                 break;
         }
         int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
