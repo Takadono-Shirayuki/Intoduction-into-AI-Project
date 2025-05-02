@@ -1,0 +1,3 @@
+Giúp nhé, Slime-San
+Tìm tât cả con đường có thể di chuyển ở xung quanh.
+Slime sẽ mệt khi đi quá xa.

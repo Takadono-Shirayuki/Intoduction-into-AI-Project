@@ -224,16 +224,6 @@ public class MazeEnv {
         maze.setPathPercent(pathPercent);
     }
 
-    /** 
-     * Kiểm tra tính hợp lệ của vị trí trong mê cung.<p>
-     * Vị trí hợp lệ là vị trí không nằm trong tường và nằm trong kích thước của mê cung.
-     * @param position Vị trí cần kiểm tra.
-     * @return true nếu vị trí hợp lệ, false nếu không hợp lệ.
-     */
-    public boolean checkPositionValidity(Point position) {
-        return maze.checkPositionValidity(position);
-    }
-
     /**
      * Trả về mê cung hiện tại.<p>
      * Ý nghĩa giá trị của từng ô xem tại lớp Maze.

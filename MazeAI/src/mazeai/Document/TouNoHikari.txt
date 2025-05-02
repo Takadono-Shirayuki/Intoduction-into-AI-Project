@@ -1,0 +1,3 @@
+Ánh sáng của Đảng
+Soi sáng khu vực rộng lớn xung quanh người chơi.
+Khu vực được soi sáng có kích thước 17x17.

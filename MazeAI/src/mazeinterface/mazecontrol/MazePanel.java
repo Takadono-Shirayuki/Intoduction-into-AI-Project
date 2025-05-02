@@ -1,4 +1,4 @@
-package mazeinterface;
+package mazeinterface.mazecontrol;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,7 +27,7 @@ public class MazePanel extends JPanel {
         this.mazeSize = mazeSize;
         this.mazeEnv = mazeEnv;
 
-        setPreferredSize(new Dimension(800, 600));
+        setPreferredSize(new Dimension(750, 750));
         adjustScaleToFit();
 
         // Thiết lập để nhận sự kiện phím
@@ -184,7 +184,7 @@ public class MazePanel extends JPanel {
      */
     public void useSkill(int skill) {
         mazeEnv.regenerateMaze(skill, MazeEnv.Debuff.NONE);
-        //repaint();
+        repaint();
         requestFocusInWindow();  // Gọi lại để đảm bảo nhận sự kiện từ bàn phím
     }
 }

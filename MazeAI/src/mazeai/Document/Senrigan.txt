@@ -1,0 +1,4 @@
+Thiên lý nhãn
+Tăng tầm nhìn của người chơi trong mê cung.
+Tầm nhìn ban đâu là 3.
+Tầm nhìn sau khi tăng là 5.
