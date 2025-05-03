@@ -78,7 +78,6 @@ public class SkillDialog extends JDialog {
         add(contentPanel);
         setSize(frame.getWidth(), frame.getHeight());
         setLocationRelativeTo(frame);
-        setVisible(true);
     }
 
     /**

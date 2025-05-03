@@ -1,10 +1,18 @@
 package mazeinterface.mazecontrol;
 
 import javax.swing.*;
+
+import mazeinterface.MazeInterface;
+
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.List;
+import java.util.Random;
+
 import mazenv.*;
+import mazenv.MazeEnv.Buff;
+import mazenv.MazeEnv.Debuff;
 
 /**
  * Lớp hiển thị và quản lý giao diện đồ họa cho mê cung.
@@ -17,15 +25,17 @@ public class MazePanel extends JPanel {
     private boolean fullView = false;
 
     private MazeEnv mazeEnv;
-
+    private int stepCounter = 0;
+    private MazeInterface parent;
     /**
      * Khởi tạo panel mê cung.
      * @param mazeSize Kích thước mê cung (số ô mỗi chiều)
      * @param mazeEnv Đối tượng môi trường mê cung
      */
-    public MazePanel(int mazeSize, MazeEnv mazeEnv) {
+    public MazePanel(int mazeSize, MazeEnv mazeEnv, MazeInterface parent) {
         this.mazeSize = mazeSize;
         this.mazeEnv = mazeEnv;
+        this.parent = parent;
 
         setPreferredSize(new Dimension(750, 750));
         adjustScaleToFit();
@@ -71,12 +81,30 @@ public class MazePanel extends JPanel {
      */
     public void movePlayer(int action) {
         Pair<MazeState, Boolean> stepState = mazeEnv.step(action);
-
-        repaint();
-        if (stepState.getItem1().success == true) {
-            JOptionPane.showMessageDialog(this, "Đã tìm thấy đường đi đến đích!");
-            mazeEnv.reset();
+        if (stepState.getItem2() == true)
+        {
+            stepCounter++;
             repaint();
+            if (stepState.getItem1().success == true) {
+                JOptionPane.showMessageDialog(this, "Đã tìm thấy đường đi đến đích!");
+                mazeEnv.reset();
+                repaint();
+                stepCounter = mazeEnv.maxStep;
+            }
+            if (stepCounter == mazeEnv.maxStep)
+            {
+                int buff = parent.openSkillDialog();
+                int debuff = Debuff.NONE;
+                if (mazeEnv.inGoalArea() && buff != Buff.NONE)
+                {
+                    List<Integer> debuffs = Debuff.getDebuffList();
+                    Random random = new Random();
+                    debuff = debuffs.get(random.nextInt(debuffs.size()));
+                }
+                mazeEnv.regenerateMaze(buff, debuff);
+                stepCounter = 0;
+                repaint();
+            }
         }
     }
 
@@ -103,14 +131,6 @@ public class MazePanel extends JPanel {
         int width = getWidth();
         int height = getHeight();
         scale = Math.min((float) width / mazeSize, (float) height / mazeSize);
-        repaint();
-    }
-
-    /**
-     * Tạo mê cung mới và reset trạng thái trò chơi.
-     */
-    public void generateNewMaze() {
-        mazeEnv.reset();
         repaint();
     }
 

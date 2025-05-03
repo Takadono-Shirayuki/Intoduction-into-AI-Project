@@ -1,6 +1,7 @@
 package mazenv;
 
 import java.awt.Point;
+import java.util.List;
 
 public class MazeEnv {
     /**
@@ -72,6 +73,11 @@ public class MazeEnv {
          * Debuff tạo mê cung chết, không có đường đi đến đích.
          */
         public static final int SHIN_NO_MEIRO = 2;
+
+        public static final int SHUU_MATSU_DO_KEI = 3;
+        public static List<Integer> getDebuffList() {
+            return List.of(WAAMU_HOURU, SHIN_NO_MEIRO, SHUU_MATSU_DO_KEI);
+        }
     }
 
     private Maze maze;
@@ -247,5 +253,17 @@ public class MazeEnv {
      */
     public Point getAgentPosition() {
         return maze.getAgentPosition();
+    }
+
+    /**
+     * Kiểm tra xem tác tử có ở trong khu vực đích hay không.
+     * @return true nếu tác tử ở trong khu vực đích, false nếu không.
+     */
+    public Boolean inGoalArea() {
+        if (maze.getAgentPosition().x >= maze.getMazeSize() * 2 / 3 && maze.getAgentPosition().y >= maze.getMazeSize() * 2 / 3) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

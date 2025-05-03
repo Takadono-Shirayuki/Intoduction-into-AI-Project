@@ -3,6 +3,7 @@ package mazeinterface;
 import javax.swing.*;
 
 import mazeinterface.mazecontrol.MazePanel;
+import mazeinterface.mazecontrol.MessageDialog;
 import mazeinterface.mazecontrol.SkillDialog;
 
 import java.awt.*;
@@ -12,7 +13,7 @@ import mazenv.MazeEnv.Buff;
 public class MazeInterface {
     private JFrame frame;
     private MazePanel mazePanel;
-
+    private SkillDialog skillDialog;
     /**
      * Khởi tạo giao diện chính của trò chơi mê cung
      * @param mazeSize Kích thước mê cung
@@ -44,7 +45,7 @@ public class MazeInterface {
 
         // Khởi tạo MazePanel và thêm vào JFrame
         MazeEnv mazeEnv = new MazeEnv(mazeSize, 15, 50, Buff.SLIME_STEP, Buff.TOU_NO_HIKARI_OBS);
-        mazePanel = new MazePanel(mazeSize, mazeEnv);
+        mazePanel = new MazePanel(mazeSize, mazeEnv, this);
 
         JPanel container = new JPanel(new GridBagLayout());
         container.setOpaque(false);
@@ -56,12 +57,6 @@ public class MazeInterface {
         JPanel topLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topLeftPanel.setOpaque(false);
 
-        // Tạo nút chọn kỹ năng
-        JButton skillMenuBtn = new JButton("\uD83C\uDFAF Skill");
-        skillMenuBtn.setPreferredSize(new Dimension(120, 40));
-        skillMenuBtn.addActionListener(e -> openSkillDialog());
-        topLeftPanel.add(skillMenuBtn);
-
         // Tạo nút cài đặt
         JButton settingBtn = new JButton("⚙");
         settingBtn.setPreferredSize(new Dimension(50, 40));
@@ -70,6 +65,7 @@ public class MazeInterface {
         settingMenu.add(new JMenuItem("Load"));
         settingMenu.add(new JMenuItem("Save"));
         settingMenu.add(new JMenuItem("Home"));
+
         settingBtn.addActionListener(e -> settingMenu.show(settingBtn, 0, settingBtn.getHeight()));
         topLeftPanel.add(settingBtn);
 
@@ -81,20 +77,25 @@ public class MazeInterface {
                 mazePanel.adjustScaleToFit();
             }
         });
-
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
+        
+        MessageDialog messageDialog = new MessageDialog(frame, "<html><div style='text-align: center;'>Chào mừng bạn đến với <br> Mê cung vô vọng</div></html>", new Dimension(300, 100));
+        mazePanel.useSkill(openSkillDialog()); // Mở dialog chọn kỹ năng
         mazePanel.requestFocusInWindow();
-    }
-
-    private void openSkillDialog() {
-        SkillDialog skillDialog = new SkillDialog(frame);
-        int selectedSkill = skillDialog.selectedSkill; // Lấy kỹ năng đã chọn từ SkillDialog
-        mazePanel.useSkill(selectedSkill); // Sử dụng kỹ năng trong MazePanel
-        skillDialog.dispose(); // Đóng SkillDialog
     }
 
     public MazePanel getMazePanel() {
         return mazePanel;
+    }
+
+    public int openSkillDialog() {
+        if (skillDialog == null)
+            skillDialog = new SkillDialog(frame);
+        skillDialog.setVisible(true); // Hiển thị dialog chọn kỹ năng
+        int selectedSkill = skillDialog.selectedSkill;
+        skillDialog.selectedSkill = Buff.NONE; // Đặt lại kỹ năng đã chọn về NONE
+        skillDialog.Click_SkillCard(Buff.NONE); // Đặt lại kỹ năng tạm thời về NONE
+        return selectedSkill;
     }
 }

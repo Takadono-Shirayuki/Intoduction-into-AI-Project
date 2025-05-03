@@ -342,6 +342,14 @@ public class Maze {
     }
 
     /**
+     * Lấy kích thước của mê cung.
+     * @return Kích thước của mê cung.
+     */
+    public int getMazeSize() {
+        return mazeSize;
+    }
+    
+    /**
      * Lấy vị trí của tác tử trong mê cung.
      * @return Tọa độ của tác tử.
      */
