@@ -8,9 +8,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -28,10 +25,6 @@ public class SkillCard extends JPanel {
     private static final String TOU_NO_HIKARI_ICON = "Icon/TouNoHikari.jpg";
     private static final String UNMEI_NO_MICHI_ICON = "Icon/UnmeiNoMichi.jpg";
 
-    private static final String SENRIGAN_DOC = "Document/Senrigan.txt";
-    private static final String SLIME_SAN_ONEGAI_DOC = "Document/SlimeSanOnegai.txt";
-    private static final String TOU_NO_HIKARI_DOC = "Document/TouNoHikari.txt";
-    private static final String UNMEI_NO_MICHI_DOC = "Document/UnmeiNoMichi.txt";
     private int skillBuff; // Biến để lưu kỹ năng đã chọn
     private SkillDialog parent;
     /**
@@ -50,28 +43,23 @@ public class SkillCard extends JPanel {
 
         // Lấy đường dẫn đến icon và tài liệu mô tả kỹ năng dựa trên mã kỹ năng
         String iconPath = ""; // Đường dẫn đến icon kỹ năng
-        String docPath = ""; // Đường dẫn đến tài liệu mô tả kỹ năng
         switch (skillBuff) {
             case Buff.SENRIGAN:
                 iconPath = SENRIGAN_ICON;
-                docPath = SENRIGAN_DOC;
                 break;
             case Buff.SLIME_SAN_ONEGAI:
                 iconPath = SLIME_SAN_ONEGAI_ICON;
-                docPath = SLIME_SAN_ONEGAI_DOC;
                 break;
             case Buff.TOU_NO_HIKARI:
                 iconPath = TOU_NO_HIKARI_ICON;
-                docPath = TOU_NO_HIKARI_DOC;
                 break;
             case Buff.UNMEI_NO_MICHI:
                 iconPath = UNMEI_NO_MICHI_ICON;
-                docPath = UNMEI_NO_MICHI_DOC;
                 break;
             default:
                 break;
         }
-        Pair<String, String> doc = getDocument(docPath); // Lấy tên và mô tả kỹ năng từ tài liệu
+        Pair<String, String> doc = Buff.getBuffInfo(skillBuff); // Lấy thông tin kỹ năng từ mã kỹ năng
 
         // Tạo icon kỹ năng 
         ImageIcon icon = createRoundedIcon(iconPath, 100);
@@ -190,29 +178,5 @@ public class SkillCard extends JPanel {
      */
     public int getSkillBuff() {
         return skillBuff;
-    }
-
-    /**
-     * Lấy tài liệu mô tả kỹ năng từ đường dẫn.
-     * @param path Đường dẫn đến tài liệu
-     * @return Tên và mô tả kỹ năng dưới dạng Pair
-     */
-    private Pair<String, String> getDocument(String path) {
-        String skillName, skillDescription;
-        
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/mazeai/" + path)))) {
-            skillName = reader.readLine(); // Đọc dòng đầu tiên là tên kỹ năng
-            
-            StringBuilder descriptionBuilder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                descriptionBuilder.append(line).append("\n"); // Đọc các dòng tiếp theo là mô tả kỹ năng
-            }
-            skillDescription = descriptionBuilder.toString().trim(); // Chuyển đổi thành chuỗi và loại bỏ khoảng trắng thừa
-        } catch (IOException e) {
-            System.err.println("Không thể đọc tài liệu: " + path);
-            return null;
-        }
-        return new Pair<String, String>(skillName, skillDescription); // Trả về tên và mô tả kỹ năng
     }
 }

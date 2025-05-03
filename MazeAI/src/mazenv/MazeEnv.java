@@ -1,6 +1,9 @@
 package mazenv;
 
 import java.awt.Point;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 public class MazeEnv {
@@ -52,6 +55,51 @@ public class MazeEnv {
 
         public static final int SLIME_STEP = 100;
         public static final int TOU_NO_HIKARI_OBS = 8;
+
+        private static final String SENRIGAN_DOC = "/src/mazeai/Document/Senrigan.txt";
+        private static final String SLIME_SAN_ONEGAI_DOC = "/src/mazeai/Document/SlimeSanOnegai.txt";
+        private static final String TOU_NO_HIKARI_DOC = "/src/mazeai/Document/TouNoHikari.txt";
+        private static final String UNMEI_NO_MICHI_DOC = "/src/mazeai/Document/UnmeiNoMichi.txt";
+        /**
+         * Lấy tài liệu mô tả kỹ năng từ đường dẫn.
+         * @param path Đường dẫn đến tài liệu
+         * @return Tên và mô tả kỹ năng dưới dạng Pair
+         */
+        public static Pair<String, String> getBuffInfo(int buff) {
+            String path = "";
+            switch (buff) {
+                case Buff.SENRIGAN:
+                    path = SENRIGAN_DOC;
+                    break;
+                case Buff.SLIME_SAN_ONEGAI:
+                    path = SLIME_SAN_ONEGAI_DOC;
+                    break;
+                case Buff.TOU_NO_HIKARI:
+                    path = TOU_NO_HIKARI_DOC;
+                    break;
+                case Buff.UNMEI_NO_MICHI:   
+                    path = UNMEI_NO_MICHI_DOC;
+                    break;
+                default:
+                    break;
+            }
+            String skillName, skillDescription;
+            
+            try (BufferedReader reader = new BufferedReader(new FileReader(System.getProperty("user.dir") + path))) {
+                skillName = reader.readLine(); // Đọc dòng đầu tiên là tên kỹ năng
+                
+                StringBuilder descriptionBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    descriptionBuilder.append(line).append("\n"); // Đọc các dòng tiếp theo là mô tả kỹ năng
+                }
+                skillDescription = descriptionBuilder.toString().trim(); // Chuyển đổi thành chuỗi và loại bỏ khoảng trắng thừa
+            } catch (IOException e) {
+                System.err.println("Không thể đọc tài liệu: " + path);
+                return null;
+            }
+            return new Pair<String, String>(skillName, skillDescription); // Trả về tên và mô tả kỹ năng
+        }
     }
 
     /**
@@ -74,19 +122,78 @@ public class MazeEnv {
          */
         public static final int SHIN_NO_MEIRO = 2;
 
+        /**
+         * Debuff giới hạn số bước đi còn lại của người chơi.
+         */
         public static final int SHUU_MATSU_DO_KEI = 3;
+
+        /**
+         * Lấy danh sách các debuff có thể kích hoạt.
+         * @return Danh sách các debuff có thể kích hoạt.
+         */
         public static List<Integer> getDebuffList() {
             return List.of(WAAMU_HOURU, SHIN_NO_MEIRO, SHUU_MATSU_DO_KEI);
+        }
+
+        private static final String WAAMU_HOURU_DOC = "/src/mazeai/Document/WaamuHouru.txt";
+        private static final String SHIN_NO_MEIRO_DOC = "/src/mazeai/Document/ShinNoMeiro.txt";
+        private static final String SHUU_MATSU_DO_KEI_DOC = "/src/mazeai/Document/ShuuMatsuDoKei.txt";
+        /**
+         * Lấy tài liệu mô tả debuff từ đường dẫn.
+         * @param path Đường dẫn đến tài liệu
+         * @return Tên và mô tả debuff dưới dạng Pair
+         */
+         public static Pair<String, String> getBuffInfo(int buff) {
+            String path = "";
+            switch (buff) {
+                case Debuff.WAAMU_HOURU:
+                    path = WAAMU_HOURU_DOC;
+                    break;
+                case Debuff.SHIN_NO_MEIRO:
+                    path = SHIN_NO_MEIRO_DOC;
+                    break;
+                case Debuff.SHUU_MATSU_DO_KEI:
+                    path = SHUU_MATSU_DO_KEI_DOC;
+                    break;
+                default:
+                    break;
+            }
+            String debuffName, debuffDescription;
+            
+            try (BufferedReader reader = new BufferedReader(new FileReader(System.getProperty("user.dir") + path))) {
+                debuffName = reader.readLine(); // Đọc dòng đầu tiên là tên kỹ năng
+                
+                StringBuilder descriptionBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    descriptionBuilder.append(line).append("\n"); // Đọc các dòng tiếp theo là mô tả kỹ năng
+                }
+                debuffDescription = descriptionBuilder.toString().trim(); // Chuyển đổi thành chuỗi và loại bỏ khoảng trắng thừa
+            } catch (IOException e) {
+                System.err.println("Không thể đọc tài liệu: " + path);
+                return null;
+            }
+            return new Pair<String, String>(debuffName, debuffDescription); // Trả về tên và mô tả kỹ năng
         }
     }
 
     private Maze maze;
     private DiscoveredMaze discoveredMaze;
     private boolean senriganBuff = false;
-    private int slimeStep;
-    private int touNoHikariObs;
-    public int maxStep;
-    
+    private int slimeStep; // Thay đổi mỗi khi qua màn
+    private int touNoHikariObs; 
+    public int maxStep; // Thay đổi mỗi khi qua màn
+    private int stepRemaining = 0;
+    private int numberOfUsedSteps = 0; 
+    private int reward; // Thay đổi mỗi khi qua màn 
+    // Lưu dữ liệu khởi tạo
+    private int baseMazeSize;
+    private int baseMaxStep;
+    private int basePathPercent;
+    private int baseSlimeStep;
+    private int baseTouNoHikariObs;
+    private boolean hellMode = false;
+
     public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep, int touNoHikariObs) {
         this(mazeSize, maxStep, pathPercent, slimeStep, touNoHikariObs, false);
     }
@@ -97,6 +204,16 @@ public class MazeEnv {
         this.maxStep = maxStep;
         this.slimeStep = slimeStep;
         this.touNoHikariObs = touNoHikariObs;
+        this.reward = 4 * mazeSize;
+        reset();
+
+        // Lưu dữ liệu khởi tạo
+        this.baseMazeSize = mazeSize;
+        this.baseMaxStep = maxStep;
+        this.basePathPercent = pathPercent;
+        this.baseSlimeStep = slimeStep;
+        this.baseTouNoHikariObs = touNoHikariObs;
+        this.hellMode = hellMode;
     }
 
     public void createDataSet(String path) {
@@ -113,6 +230,7 @@ public class MazeEnv {
      * Thông tin trạng thái mê cung xem tại lớp MazeState.
      */
     public MazeState reset() {
+        stepRemaining += reward - numberOfUsedSteps;
         maze.reset();
         return regenerateMaze(Buff.NONE);
     }
@@ -166,6 +284,15 @@ public class MazeEnv {
                 break;
             case Debuff.SHIN_NO_MEIRO:
                 deadMaze = true;
+                Point agentPos = maze.getAgentPosition();
+                Point goalPos = maze.getGoalPosition();
+                if (Math.abs(agentPos.x - goalPos.x) < 2 && Math.abs(agentPos.y - goalPos.y) < 2) {
+                    maze.activateWaamuHouruDebuff();
+                }
+                break;
+            case Debuff.SHUU_MATSU_DO_KEI:
+                numberOfUsedSteps = numberOfUsedSteps + stepRemaining - maxStep;
+                stepRemaining = maxStep;
                 break;
             default:
                 break;
@@ -203,6 +330,10 @@ public class MazeEnv {
      */
     public Pair<MazeState, Boolean> step(int action) {
         boolean takeAction = maze.step(action);
+        if (takeAction) {
+            numberOfUsedSteps++;
+            stepRemaining --;
+        }
         Point agentPos = maze.getAgentPosition();
         int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
         discoveredMaze.discoverMaze(mazeData);
@@ -265,5 +396,31 @@ public class MazeEnv {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Trả về số bước còn lại trong mê cung. <p>
+     * Khi số bước về 0, trò chơi kết thúc. <p>
+     * Nhận được thêm số bước mỗi khi qua màn.
+     * @return Số bước còn lại trong mê cung.
+     */
+    public int getStepRemaining() {
+        return stepRemaining;
+    }
+
+    public void gameOver() {
+        // Khởi tạo lại môi trường mê cung với các thông số ban đầu.
+        maze = new Maze(baseMazeSize, basePathPercent);
+        discoveredMaze = new DiscoveredMaze(baseMazeSize, maze.getDiscoverData(3), hellMode);
+        maxStep = baseMaxStep;
+        slimeStep = baseSlimeStep;
+        touNoHikariObs = baseTouNoHikariObs;
+        reward = 4 * baseMazeSize;
+
+        stepRemaining = 0;
+        numberOfUsedSteps = 0;
+        senriganBuff = false;
+        // Đặt lại mê cung về trạng thái ban đầu.
+        reset();
     }
 }

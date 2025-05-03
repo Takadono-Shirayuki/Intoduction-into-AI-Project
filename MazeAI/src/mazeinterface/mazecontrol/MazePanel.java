@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Random;
 
 import mazenv.*;
-import mazenv.MazeEnv.Buff;
 import mazenv.MazeEnv.Debuff;
 
 /**
@@ -36,7 +35,7 @@ public class MazePanel extends JPanel {
         this.mazeSize = mazeSize;
         this.mazeEnv = mazeEnv;
         this.parent = parent;
-
+        
         setPreferredSize(new Dimension(750, 750));
         adjustScaleToFit();
 
@@ -84,27 +83,50 @@ public class MazePanel extends JPanel {
         if (stepState.getItem2() == true)
         {
             stepCounter++;
-            repaint();
-            if (stepState.getItem1().success == true) {
-                JOptionPane.showMessageDialog(this, "Đã tìm thấy đường đi đến đích!");
-                mazeEnv.reset();
-                repaint();
+            // Nếu người chơi đã đi hết số bước tối đa, hiển thị thông báo trò chơi kết thúc
+            if (mazeEnv.getStepRemaining() == 0)
+            {
+                parent.showMessage("Trò chơi kêt thúc", new Dimension(300, 100));
+                mazeEnv.gameOver();
                 stepCounter = mazeEnv.maxStep;
             }
+
+            // Nếu người chơi đã đến đích, hiển thị thông báo
+            if (stepState.getItem1().success == true) {
+                // Nếu người chơi đã đến đích, hiển thị thông báo
+                parent.showMessage("Đã tìm thấy đường tới đích", new Dimension(300, 100));
+                // Đặt lại mê cung và số bước đếm
+                mazeEnv.reset();
+                stepCounter = mazeEnv.maxStep;
+            }
+
+            // Nếu người chơi đi hết số bước trong 1 lượt, tái tạo mê cung 
             if (stepCounter == mazeEnv.maxStep)
             {
+                // Hiển thị hộp thoại chọn buff
                 int buff = parent.openSkillDialog();
                 int debuff = Debuff.NONE;
-                if (mazeEnv.inGoalArea() && buff != Buff.NONE)
+                
+                if (mazeEnv.inGoalArea())
                 {
+                    // Chọn một debuff ngẫu nhiên từ danh sách
                     List<Integer> debuffs = Debuff.getDebuffList();
                     Random random = new Random();
+                    // Chọn một debuff ngẫu nhiên từ danh sách
                     debuff = debuffs.get(random.nextInt(debuffs.size()));
+                    // Đọc thông tin về debuff từ lớp Debuff
+                    Pair<String, String> debuffInfo = Debuff.getBuffInfo(debuff);
+                    // Hiển thị thông tin debuff trong một hộp thoại
+                    String message = "<html><div style='text-align: center;'>" + debuffInfo.getItem1() + "</div><br>" + 
+                        debuffInfo.getItem2().replace("\n", "<br>") + "</html>";
+                    parent.showMessage(message, new Dimension(400, 250));
                 }
+                // Gọi hàm regenerateMaze với buff và debuff đã chọn
                 mazeEnv.regenerateMaze(buff, debuff);
+                // Đặt lại số bước đếm
                 stepCounter = 0;
-                repaint();
             }
+            repaint();
         }
     }
 

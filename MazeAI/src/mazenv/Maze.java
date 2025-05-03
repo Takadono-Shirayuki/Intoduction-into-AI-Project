@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
-import java.util.Stack;
 
 import mazenv.MazeEnv.Action;
 
@@ -54,7 +53,7 @@ public class Maze {
         this.basePosition = new Point(this.mazeSize / 6 - 1, this.mazeSize / 6 - 1);
         this.agentPosition = new Point(basePosition);
         this.goalPosition = new Point(mazeSize * 5 / 6, mazeSize * 5 / 6);
-        generateMaze(2, false);
+        generateMaze(0, false);
     }
 
     /**
@@ -71,18 +70,18 @@ public class Maze {
         }
 
         Random rand = new Random();
+        int totalCells = mazeSize * mazeSize;
+        int numPaths = (int) (totalCells * pathPercent / 100.0);
+        int numWalls = totalCells - numPaths;
 
+        // Tạo danh sách ngẫu nhiên các giá trị đường và tường 
+        List<Integer> mazeValues = new ArrayList<>();
+        for (int i = 0; i < numPaths; i++)
+            mazeValues.add(PATH);
+        for (int i = 0; i < numWalls; i++)
+            mazeValues.add(WALL);
+            
         while (true) {
-            int totalCells = mazeSize * mazeSize;
-            int numPaths = (int) (totalCells * pathPercent / 100.0);
-            int numWalls = totalCells - numPaths;
-
-            // Tạo danh sách ngẫu nhiên các giá trị đường và tường 
-            List<Integer> mazeValues = new ArrayList<>();
-            for (int i = 0; i < numPaths; i++)
-                mazeValues.add(PATH);
-            for (int i = 0; i < numWalls; i++)
-                mazeValues.add(WALL);
             Collections.shuffle(mazeValues, rand);
 
             // Điền dữ liệu vào ma trận mê cung
@@ -111,45 +110,81 @@ public class Maze {
      * @return true nếu mê cung hợp lệ, false nếu không hợp lệ.
      */
     private boolean validateMaze(int numberOfPath, boolean deadMaze) {
-        Stack<Point> stack = new Stack<>();
-        stack.push(new Point(agentPosition));
-        Set<Point> visited = new HashSet<>();
         int d = 0;
+        int[][] tempMaze = copyMaze(maze); // Tạo bản sao của mê cung
 
-        while (!stack.isEmpty()) {
-            Point p = stack.pop();
-            int x = p.x;
-            int y = p.y;
+        for (int i = 0; i < numberOfPath; i++) {
+            List<Point> path = shortestPath(tempMaze); // Tìm đường đi ngắn nhất
 
-            if (deadMaze && goalPosition.equals(p)) {
-                return false;
+            if (path == null || path.isEmpty()) { // Nếu không tìm thấy đường đi
+                break;
             }
 
-            if (goalPosition.equals(p)) {
-                d++;
-                if (d == numberOfPath) {
-                    return true;
-                }
-                continue;
+            d++; // Tăng số lượng đường đi hợp lệ
+
+            for (Point coord : path) {
+                tempMaze[coord.x][coord.y] = Maze.WALL; // Đánh dấu đường đi đã sử dụng
             }
 
-            if (visited.contains(p)) {
-                continue;
-            }
-            visited.add(p);
+            tempMaze[agentPosition.x][agentPosition.y] = Maze.PATH; // Đặt lại vị trí tác tử
+            tempMaze[goalPosition.x][goalPosition.y] = Maze.GOAL; // Đặt lại vị trí đích
+        }
 
-            // Lấy danh sách hàng xóm
-            List<Point> neighbors = getNeighbors(x, y);
+        if (deadMaze) {
+            return d == 0; // Không có đường đi hợp lệ
+        } else if (d == numberOfPath) {
+            return true; // Có đủ số đường đi hợp lệ
+        } else {
+            return false; // Một số đường đi hợp lệ nhưng chưa đủ
+        }
+    }
+
+    /**
+     * Sao chép mê cung để không làm thay đổi mê cung gốc.
+     * @param original Mê cung gốc.
+     * @return Bản sao của mê cung gốc.
+     */
+    private int[][] copyMaze(int[][] original) {
+        int[][] copy = new int[original.length][original[0].length];
+        for (int i = 0; i < original.length; i++) {
+            System.arraycopy(original[i], 0, copy[i], 0, original[i].length);
+        }
+        return copy;
+    }
+
+    /**
+     * Tìm đường đi ngắn nhất từ vị trí hiện tại đến đích trong mê cung.
+     * @param maze Mê cung hiện tại.
+     * @return Danh sách các tọa độ của đường đi ngắn nhất.
+     */
+    private List<Point> shortestPath(int[][] maze) {
+        Queue<Pair<Point, List<Point>>> queue = new LinkedList<>();
+        Set<Point> visited = new HashSet<>();
+        queue.add(new Pair<Point, List<Point>>(agentPosition, new ArrayList<>()));
+        visited.add(agentPosition);
+
+        while (!queue.isEmpty()) {
+            Pair<Point, List<Point>> current = queue.poll();
+            Point currentPoint = current.getItem1();
+            List<Point> path = current.getItem2();
+
+            // Kiểm tra nếu đã đến đích
+            if (currentPoint.equals(goalPosition)) {
+                return path; // Trả về đường đi ngắn nhất
+            }
+
+            // Lấy các điểm lân cận
+            List<Point> neighbors = getNeighbors(currentPoint.x, currentPoint.y);
             for (Point neighbor : neighbors) {
-                int nx = neighbor.x;
-                int ny = neighbor.y;
-                if (maze[nx][ny] != WALL && !visited.contains(neighbor)) {
-                    stack.push(neighbor);
+                if (!visited.contains(neighbor) && maze[neighbor.x][neighbor.y] != WALL) {
+                    visited.add(neighbor);
+                    List<Point> newPath = new ArrayList<>(path);
+                    newPath.add(neighbor);
+                    queue.add(new Pair<>(neighbor, newPath));
                 }
             }
         }
-
-        return deadMaze; // Nếu không tìm được đường đi thì phụ thuộc vào deadMaze
+        return null; // Không tìm thấy đường đi đến đích
     }
 
     /**
@@ -331,12 +366,7 @@ public class Maze {
      * @return Mê cung hiện tại.
      */
     public int[][] getMaze() {
-        int[][] returnMaze = new int[mazeSize][mazeSize];
-        for (int i = 0; i < mazeSize; i++) {
-            for (int j = 0; j < mazeSize; j++) {
-                returnMaze[i][j] = maze[i][j]; // Sao chép mê cung
-            }
-        }
+        int[][] returnMaze = copyMaze(maze); // Tạo bản sao của mê cung
         returnMaze[agentPosition.x][agentPosition.y] = AGENT_POSITION; // Đánh dấu vị trí của tác tử
         return returnMaze;      
     }

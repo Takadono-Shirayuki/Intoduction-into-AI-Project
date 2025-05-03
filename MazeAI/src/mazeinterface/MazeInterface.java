@@ -44,7 +44,7 @@ public class MazeInterface {
         }
 
         // Khởi tạo MazePanel và thêm vào JFrame
-        MazeEnv mazeEnv = new MazeEnv(mazeSize, 15, 50, Buff.SLIME_STEP, Buff.TOU_NO_HIKARI_OBS);
+        MazeEnv mazeEnv = new MazeEnv(mazeSize, 15, 60, Buff.SLIME_STEP, Buff.TOU_NO_HIKARI_OBS);
         mazePanel = new MazePanel(mazeSize, mazeEnv, this);
 
         JPanel container = new JPanel(new GridBagLayout());
@@ -80,7 +80,7 @@ public class MazeInterface {
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
         
-        MessageDialog messageDialog = new MessageDialog(frame, "<html><div style='text-align: center;'>Chào mừng bạn đến với <br> Mê cung vô vọng</div></html>", new Dimension(300, 100));
+        showMessage("<html><div style='text-align: center;'>Chào mừng bạn đến với <br> Mê cung vô vọng</div></html>", new Dimension(300, 100));
         mazePanel.useSkill(openSkillDialog()); // Mở dialog chọn kỹ năng
         mazePanel.requestFocusInWindow();
     }
@@ -97,5 +97,10 @@ public class MazeInterface {
         skillDialog.selectedSkill = Buff.NONE; // Đặt lại kỹ năng đã chọn về NONE
         skillDialog.Click_SkillCard(Buff.NONE); // Đặt lại kỹ năng tạm thời về NONE
         return selectedSkill;
+    }
+
+    public void showMessage(String message, Dimension size) {
+        new MessageDialog(frame, message, size);
+        mazePanel.requestFocusInWindow(); // Đặt lại focus cho mazePanel sau khi hiển thị thông báo
     }
 }

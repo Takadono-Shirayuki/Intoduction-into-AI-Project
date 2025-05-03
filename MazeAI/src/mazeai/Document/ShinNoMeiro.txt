@@ -1,0 +1,4 @@
+Mê cung chết
+Không có đường tới đích.
+Kích hoạt debuff lỗ sâu 
+nếu người chơi quá gần đích
