@@ -82,9 +82,9 @@ public class MainForm extends JFrame {
         
         if (continueGame) {
             // Có thể thêm logic để tiếp tục trò chơi từ trạng thái đã lưu
-            new MazeInterface(mazeSize);
+            new GameForm(mazeSize);
         } else {
-            new MazeInterface(mazeSize);
+            new GameForm(mazeSize);
         }
     }
 

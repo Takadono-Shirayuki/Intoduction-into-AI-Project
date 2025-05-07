@@ -2,7 +2,7 @@ package mazeinterface.mazecontrol;
 
 import javax.swing.*;
 
-import mazeinterface.MazeInterface;
+import mazeinterface.GameForm;
 
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -25,13 +25,13 @@ public class MazePanel extends JPanel {
 
     private MazeEnv mazeEnv;
     private int stepCounter = 0;
-    private MazeInterface parent;
+    private GameForm parent;
     /**
      * Khởi tạo panel mê cung.
      * @param mazeSize Kích thước mê cung (số ô mỗi chiều)
      * @param mazeEnv Đối tượng môi trường mê cung
      */
-    public MazePanel(int mazeSize, MazeEnv mazeEnv, MazeInterface parent) {
+    public MazePanel(int mazeSize, MazeEnv mazeEnv, GameForm parent) {
         this.mazeSize = mazeSize;
         this.mazeEnv = mazeEnv;
         this.parent = parent;

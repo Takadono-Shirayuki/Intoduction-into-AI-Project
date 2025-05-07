@@ -10,7 +10,7 @@ import java.awt.*;
 import mazenv.*;
 import mazenv.MazeEnv.Buff;
 
-public class MazeInterface extends JFrame {
+public class GameForm extends JFrame {
     private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/GameBackground.jpg";  // Đường dẫn đến ảnh nền
     private MazePanel mazePanel;
     private SkillDialog skillDialog;
@@ -18,7 +18,7 @@ public class MazeInterface extends JFrame {
      * Khởi tạo giao diện chính của trò chơi mê cung
      * @param mazeSize Kích thước mê cung
      */
-    public MazeInterface(int mazeSize) {
+    public GameForm(int mazeSize) {
         // Khởi tạo JFrame
         super();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
