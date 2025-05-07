@@ -54,7 +54,7 @@ public class SkillCard extends JPanel {
                 iconPath = TOU_NO_HIKARI_ICON;
                 break;
             case Buff.UNMEI_NO_MICHI:
-                iconPath = UNMEI_NO_MICHI_ICON;
+                iconPath = UNMEI_NO_MICHI_ICON; 
                 break;
             default:
                 break;
@@ -101,7 +101,7 @@ public class SkillCard extends JPanel {
         description.setWrapStyleWord(true); // Chỉ xuống dòng tại các từ
         description.setForeground(Color.WHITE); // Đặt màu chữ (tuỳ chọn)
         description.setFont(new Font("Arial", Font.BOLD, 15)); // Tuỳ chỉnh kiểu chữ
-        // Đăth sự kiện cho description
+        // Đặt sự kiện cho description
         description.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30)); // Đặt khoảng cách viền    
         description.setOpaque(true); // Để có thể thấy màu nền
         description.setBackground(new Color(0, 0, 0, 0)); // Đặt màu nền trong suốt
