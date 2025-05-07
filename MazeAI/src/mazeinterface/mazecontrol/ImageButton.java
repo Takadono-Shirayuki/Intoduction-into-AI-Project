@@ -32,7 +32,7 @@ public class ImageButton extends JButton {
         setContentAreaFilled(false); // Làm trong suốt khu vực nội dung
         setBorderPainted(false); // Loại bỏ viền
         setFocusPainted(false); // Loại bỏ đường viền khi được chọn
-        setPreferredSize(size); // Điều chỉnh kích thước nút
+        setSize(size); // Đặt kích thước cho nút
         setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR)); // Đặt con trỏ chuột thành hình bàn tay
     }
 }

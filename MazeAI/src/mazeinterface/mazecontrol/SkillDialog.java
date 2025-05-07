@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import java.awt.event.WindowAdapter;
 
 import mazenv.MazeEnv.Buff;
 
@@ -20,13 +21,20 @@ public class SkillDialog extends JDialog {
 
     /**
      * Khởi tạo SkillDialog với JFrame cha. 
-     * @param frame JFrame cha để hiển thị SkillDialog
+     * @param parent JFrame cha để hiển thị SkillDialog
      */
-    public SkillDialog(JFrame frame) {
-        super(frame, "Chọn Kỹ năng", true);
+    public SkillDialog(JFrame parent) {
+        super(parent, "Chọn Kỹ năng", true);
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 180));
-        
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                System.exit(0); // Đóng ứng dụng nếu exitOnClose là true
+            }
+        });
+
+        // Tạo contentPanel với BorderLayout để chứa các thành phần
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
         contentPanel.setOpaque(false); // Đảm bảo nền trong suốt
@@ -76,8 +84,8 @@ public class SkillDialog extends JDialog {
         contentPanel.add(mainPanel, BorderLayout.CENTER);
 
         add(contentPanel);
-        setSize(frame.getWidth(), frame.getHeight());
-        setLocationRelativeTo(frame);
+        setSize(parent.getWidth(), parent.getHeight());
+        setLocationRelativeTo(parent);
     }
 
     /**
@@ -91,5 +99,28 @@ public class SkillDialog extends JDialog {
                 skillCard[i].resetBorder();
             }
         }
+    }
+
+    /**
+     * Hiển thị dialog.
+     */
+    public void ShowDialog() {
+        setVisible(true); // Hiển thị dialog
+    }
+
+    /**
+     * Hiển thị dialog với danh sách kỹ năng cụ thể.
+     * @param skillBuff Danh sách các kỹ năng để hiển thị
+     */
+    public void ShowDialog(int[] skillBuff) {
+        for (int i = 0; i < skillCard.length; i++) {
+            skillCard[i].setVisible(false); // Ẩn tất cả các SkillCard
+            for (int j = 0; j < skillBuff.length; j++) {
+                if (skillCard[i].getSkillBuff() == skillBuff[j]) {
+                    skillCard[i].setVisible(true); // Hiển thị SkillCard nếu kỹ năng trùng khớp
+                }
+            }
+        }
+        setVisible(true); // Hiển thị dialog
     }
 }

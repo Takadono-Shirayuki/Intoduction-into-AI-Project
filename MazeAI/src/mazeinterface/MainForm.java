@@ -2,11 +2,12 @@ package mazeinterface;
 
 import javax.swing.*;
 import mazeinterface.mazecontrol.ColorShiftButton;
+import mazeinterface.mazecontrol.ShadowOverlay;
 
 import java.awt.*;
 
 public class MainForm extends JFrame {
-    private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/Maze2.jpg";  // Đường dẫn đến ảnh nền
+    private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/MainBackground.jpg";  // Đường dẫn đến ảnh nền
 
     public MainForm() {
         // Khởi tạo cửa sổ JFrame cho menu với tiêu đề và các cấu hình cơ bản
@@ -39,8 +40,8 @@ public class MainForm extends JFrame {
         Color btnEnd = new Color(128, 0, 128);  // Màu kết thúc của gradient (tím đậm)
 
         // Vị trí và kích thước của các nút
-        int x = 150;  // Vị trí X của các nút
-        int yStart = 200;  // Vị trí Y bắt đầu của nút đầu tiên
+        int x = 620;  // Vị trí X của các nút
+        int yStart = 300;  // Vị trí Y bắt đầu của nút đầu tiên
         Dimension btnSize = new Dimension(300, 50);  // Kích thước của các nút
         int spacing = 70;  // Khoảng cách giữa các nút
 
@@ -78,14 +79,21 @@ public class MainForm extends JFrame {
 
     // Phương thức startGame để bắt đầu trò chơi mới hoặc tiếp tục trò chơi
     private void startGame(boolean continueGame) {
+        // Tạo lớp phủ mờ dần khi bắt đầu trò chơi
+        ShadowOverlay shadowOverlay = new ShadowOverlay(this, 500, 0, ShadowOverlay.MIST_FALL);
+        shadowOverlay.setVisible(true);  // Hiển thị lớp phủ mờ dần
+
         int mazeSize = 30;  // Kích thước mê cung
-        
+    
+        // Nếu tiếp tục trò chơi, lấy trạng thái đã lưu
         if (continueGame) {
             // Có thể thêm logic để tiếp tục trò chơi từ trạng thái đã lưu
-            new GameForm(mazeSize);
+            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE).setVisible(true);  // Tạo lớp phủ sáng dần cho trò chơi tiếp tục
         } else {
-            new GameForm(mazeSize);
+            // Tạo trò chơi mới
+            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE).setVisible(true);  // Tạo lớp phủ sáng dần cho trò chơi mới
         }
+        setVisible(false);  // Ẩn cửa sổ menu
     }
 
     // Phương thức startHellMode để bắt đầu chế độ địa ngục với độ khó cao hơn

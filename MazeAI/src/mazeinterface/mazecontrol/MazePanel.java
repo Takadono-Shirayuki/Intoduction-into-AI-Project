@@ -83,6 +83,7 @@ public class MazePanel extends JPanel {
         if (stepState.getItem2() == true)
         {
             stepCounter++;
+            repaint();
             // Nếu người chơi đã đi hết số bước tối đa, hiển thị thông báo trò chơi kết thúc
             if (mazeEnv.getStepRemaining() == 0)
             {
