@@ -26,6 +26,8 @@ public class MazePanel extends JPanel {
     private MazeEnv mazeEnv;
     private int stepCounter = 0;
     private GameForm parent;
+    
+
     /**
      * Khởi tạo panel mê cung.
      * @param mazeSize Kích thước mê cung (số ô mỗi chiều)
@@ -38,7 +40,7 @@ public class MazePanel extends JPanel {
         
         setPreferredSize(new Dimension(750, 750));
         adjustScaleToFit();
-
+        setOpaque(false); // Không vẽ nền riêng cho MazePanel để có thể vẽ trong suốt
         // Thiết lập để nhận sự kiện phím
         setFocusable(true);
         requestFocusInWindow();
@@ -187,7 +189,7 @@ public class MazePanel extends JPanel {
                 // Chọn màu sắc và vẽ từng ô
                 switch (mazeData[row][col]) {
                     case Maze.WALL:
-                        g2d.setColor(Color.BLACK);
+                        g2d.setColor(new Color(0, 0, 0, 0)); // vẽ trong suốt
                         g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
                         break;
                     case Maze.PATH:
@@ -203,7 +205,7 @@ public class MazePanel extends JPanel {
                         g2d.fillOval(drawX, drawY, cellWidth, cellHeight);
                         break;
                     case Maze.UNEXPLORED:
-                        g2d.setColor(Color.DARK_GRAY);
+                        g2d.setColor(new Color(0, 0, 0, 0)); // vẽ trong suốt các ô chưa có tầm nhìn
                         g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
                         break;
                     default:
@@ -215,7 +217,7 @@ public class MazePanel extends JPanel {
                 }
     
                 // Vẽ viền ô
-                g2d.setColor(Color.GRAY);
+                g2d.setColor(Color.BLACK);
                 g2d.drawRect(drawX, drawY, cellWidth, cellHeight);
             }
         }
