@@ -1,0 +1,7 @@
+npc: Chào mừng đến với trò chơi!
+player:Chào bạn! Ở đây là đâu vậy?
+npc:Bạn đang ở trong mê cung thử thách.
+npc:Nhiệm vụ của bạn là tìm đường ra khỏi đây.
+player:Nghe thú vị đấy! Tôi sẵn sàng rồi.
+npc:Tuyệt vời! Hãy dùng các phím mũi tên để di chuyển.
+npc:Chúc bạn may mắn và hãy cẩn thận!
