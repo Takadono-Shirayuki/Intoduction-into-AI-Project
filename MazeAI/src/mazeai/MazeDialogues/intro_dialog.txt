@@ -1,4 +1,6 @@
-Dialogue|npc|npc|Chào mừng đến với trò chơi!
+Select|Test|aa>>-1>>None>>None
+Input|Test|123
+Dialogue|npc|{Player Name}|Chào mừng đến với trò chơi!
 Dialogue|player|player|Chào bạn! Ở đây là đâu vậy?
 Dialogue|npc|npc|Bạn đang ở trong mê cung thử thách.
 Dialogue|npc|npc|Nhiệm vụ của bạn là tìm đường ra khỏi đây.

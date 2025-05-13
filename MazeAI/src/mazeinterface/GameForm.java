@@ -79,15 +79,15 @@ public class GameForm extends JFrame {
         });
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
-
         // Mở hộp thoại kỹ năng khi bắt đầu trò chơi
         new Timer().schedule(new java.util.TimerTask() {
             @Override
             public void run() {
+                skillDialog = new SkillDialog(GameForm.this);
                 mazePanel.useSkill(openSkillDialog());
                 cancel(); // Hủy tác vụ sau khi mở hộp thoại kỹ năng
             }
-        }, 0); // Thời gian trễ 1 giây trước khi mở hộp thoại kỹ năng
+        }, 0);
     }
 
     public MazePanel getMazePanel() {
@@ -96,8 +96,6 @@ public class GameForm extends JFrame {
 
     public int openSkillDialog()
     {
-        if (skillDialog == null)
-            skillDialog = new SkillDialog(this);
         // Tạo danh sách các kỹ năng có thể chọn
         // Loại bỏ ngẫu nhiên một kỹ năng khỏi danh sách
         int randint = (int) (Math.random() * 4); // Tạo số ngẫu nhiên từ 0 đến 3

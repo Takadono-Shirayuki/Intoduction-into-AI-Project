@@ -2,6 +2,7 @@ package mazeinterface.mazedialog; // Khai báo package chứa lớp MazeIntro
 
 import javax.swing.*; // Thư viện Swing cho giao diện người dùng
 
+import game.GameVariable;
 import mazeinterface.mazecontrol.ImageButton;
 
 import java.awt.*; // Thư viện đồ họa
@@ -50,7 +51,7 @@ public class ConversationDialog extends JDialog {
             this.character = charecter;
             this.displayName = displayName;
             this.content = content;
-            this.avatar = new ImageIcon(getClass().getResource(IMAGE_PATH + charecter + ".png"));
+            this.avatar = new ImageIcon(getClass().getResource(IMAGE_PATH + GameVariable.format(charecter) + ".png"));
         }
 
         public void run() {
@@ -81,16 +82,18 @@ public class ConversationDialog extends JDialog {
         public Input(String displayText, String variableName) {
             this.commandType = "Input"; // Loại lệnh
             this.displayText = displayText; // Văn bản hiển thị
-            this.variableName = variableName; // Tên biến
+            this.variableName = variableName; // Tên biến cần thay đổi
         }
         
         public void run() {
             // Hiện hộp thoại nhập liệu
-            String input = new ConversationInputDialog(ConversationDialog.this, displayText).returnValue; // Lấy giá trị nhập vào
+            String input = new InputDialog(parent, GameVariable.format(displayText)).returnValue; // Lấy giá trị nhập vào
             if (input != null) {
                 // Thay đổi giá trị biến trong game
                 // Game.setVariable(variableName, input);
             }
+            commandIndex++; // Tăng chỉ số câu thoại
+            processNextCommand(); // Hiện câu thoại tiếp theo
         }
     }
 
@@ -114,9 +117,9 @@ public class ConversationDialog extends JDialog {
             public Option(String option){
                 String[] parts = option.split(separator); // Tách chuỗi theo dấu phân cách
                 this.displayText = parts[0]; // Văn bản hiển thị
-                this.variableName = parts[1]; // Tên biến
-                this.variableValue = parts[2]; // Giá trị biến
-                this.nextCommandIndex = Integer.parseInt(parts[3]); // Chỉ số lệnh tiếp theo
+                this.nextCommandIndex = Integer.parseInt(parts[1]); // Chỉ số lệnh tiếp theo
+                this.variableName = parts[2]; // Tên biến
+                this.variableValue = parts[3]; // Giá trị biến
             }
         }
 
@@ -133,10 +136,10 @@ public class ConversationDialog extends JDialog {
             // Hiện hộp thoại lựa chọn
             String selections[] = new String[options.length]; // Tạo mảng chứa các tùy chọn
             for (int i = 0; i < options.length; i++) {
-                selections[i] = options[i].displayText; // Lấy văn bản hiển thị
+                selections[i] = GameVariable.format(options[i].displayText); // Lấy văn bản hiển thị
             }
 
-            int selectedOption = new ConversationSelectDialog(ConversationDialog.this, displayText, selections).returnValue; // Lấy giá trị lựa chọn
+            int selectedOption = new SelectDialog(parent, GameVariable.format(displayText), selections).returnValue; // Lấy giá trị lựa chọn
             if (selectedOption != -1) {
                 // Thay đổi giá trị biến trong game
                 // Game.setVariable(options[selectedOption].variableName, options[selectedOption].variableValue);
@@ -147,6 +150,7 @@ public class ConversationDialog extends JDialog {
                     commandIndex++; // Tăng chỉ số câu thoại
                 }
             }
+            processNextCommand(); // Hiện câu thoại tiếp theo
         }
     }
 
@@ -164,7 +168,7 @@ public class ConversationDialog extends JDialog {
 
         public void run() {
             commandIndex = nextCommandIndex; // Đổi chỉ số câu thoại
-            showNextDialogue(); // Hiện câu thoại tiếp theo
+            processNextCommand(); // Hiện câu thoại tiếp theo
         }
     }
 
@@ -206,10 +210,10 @@ public class ConversationDialog extends JDialog {
          * @param dialogue Đối tượng Dialogue chứa thông tin lời thoại
          */
         public void load(Dialogue dialogue) {
-            displayNameLabel.setText(dialogue.displayName); // Hiển thị tên người nói
+            displayNameLabel.setText(GameVariable.format(dialogue.displayName)); // Hiển thị tên người nói
             contentTextArea.setText(""); // Xóa nội dung cũ
             
-            content = dialogue.content; // Lưu nội dung lời thoại
+            content = GameVariable.format(dialogue.content); // Lưu nội dung lời thoại
 
             // Tạo hiệu ứng gõ chữ
             typingTimer = new java.util.Timer();
@@ -289,6 +293,7 @@ public class ConversationDialog extends JDialog {
             this.dimmedAvatar = new ImageIcon(GrayFilter.createDisabledImage(avatar.getImage())); // Tạo ảnh mờ
         }
     }
+    private JFrame parent; // Cửa sổ cha
 
     private CharecterImage characterImages[] = new CharecterImage[2]; // Mảng chứa ảnh nhân vật
     private int charecterImageIndex = 1; // Chỉ số nhân vật hiện tại
@@ -306,8 +311,9 @@ public class ConversationDialog extends JDialog {
      * @param parent Cửa sổ cha
      * @param dialogFilePath Đường dẫn đến file chứa lời thoại
      */
-    public ConversationDialog(Frame parent, String dialogFilePath) {
-        super(parent, "", true); // Tạo dialog modal
+    public ConversationDialog(JFrame parent, String dialogFilePath) {
+        super(parent, "", false); // Tạo dialog modal
+        this.parent = parent; // Gán cửa sổ cha
         setUndecorated(true); // Không viền
         setSize(parent.getWidth(), parent.getHeight()); // Kích thước bằng kích thước cha
         setBackground(new Color(0, 0, 0, 180)); // Màu nền mờ
@@ -335,8 +341,6 @@ public class ConversationDialog extends JDialog {
         skipButton.setBounds(getWidth() - 120, 20, 100, 40);
         skipButton.addActionListener(e -> skip());
         getContentPane().add(skipButton);
-
-        showNextDialogue(); // Hiển thị câu thoại đầu
         
         // Xử lý Alt+F4 (đóng hoàn toàn)
         addWindowListener(new WindowAdapter() {
@@ -352,10 +356,11 @@ public class ConversationDialog extends JDialog {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                showNextDialogue();
+                processNextCommand();
             }
         });
         setVisible(true); // Hiển thị cửa sổ
+        processNextCommand(); // Hiển thị câu thoại đầu tiên
     }
 
     /**
@@ -406,7 +411,7 @@ public class ConversationDialog extends JDialog {
      * Nếu đang gõ chữ thì bỏ qua hiệu ứng gõ chữ <p>
      * Nếu không còn câu thoại nào thì đóng cửa sổ
      */
-    private void showNextDialogue() {
+    private void processNextCommand() {
         if (contentTextArea.isTyping()) {
             contentTextArea.skipTyping(); // Bỏ qua hiệu ứng gõ chữ
         }

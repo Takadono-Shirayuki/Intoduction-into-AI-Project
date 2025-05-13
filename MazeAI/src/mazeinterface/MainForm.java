@@ -88,10 +88,10 @@ public class MainForm extends JFrame {
         // Nếu tiếp tục trò chơi, lấy trạng thái đã lưu
         if (continueGame) {
             // Có thể thêm logic để tiếp tục trò chơi từ trạng thái đã lưu
-            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE).setVisible(true);  // Tạo lớp phủ sáng dần cho trò chơi tiếp tục
+            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE);  // Tạo lớp phủ mờ dần khi tiếp tục trò chơi
         } else {
             // Tạo trò chơi mới
-            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE).setVisible(true);  // Tạo lớp phủ sáng dần cho trò chơi mới
+            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE);  // Tạo lớp phủ mờ dần khi bắt đầu trò chơi mới
         }
         setVisible(false);  // Ẩn cửa sổ menu
     }

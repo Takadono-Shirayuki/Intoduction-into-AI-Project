@@ -1,5 +1,6 @@
-package mazeinterface;
+package game;
 
+import mazeinterface.MainForm;
 import mazeinterface.mazedialog.ShadowOverlay;
 
 public class CheckMainInterface {

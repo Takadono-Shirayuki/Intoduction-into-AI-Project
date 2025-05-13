@@ -28,7 +28,7 @@ public class SkillDialog extends JDialog {
      * @param parent JFrame cha để hiển thị SkillDialog
      */
     public SkillDialog(JFrame parent) {
-        super(parent, "Chọn Kỹ năng", true);
+        super(parent,true);
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 180));
         addWindowListener(new WindowAdapter() {

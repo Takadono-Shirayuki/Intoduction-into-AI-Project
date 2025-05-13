@@ -72,6 +72,7 @@ public class ShadowOverlay extends JDialog {
                 }
             }
         }, delay, 10); // Bắt đầu timer sau thời gian trễ và lặp lại mỗi 10ms
+        setVisible(true); // Hiển thị lớp phủ
     }
     
 }

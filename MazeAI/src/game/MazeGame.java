@@ -1,6 +1,8 @@
-package mazeinterface;
+package game;
 
 import javax.swing.*;
+
+import mazeinterface.GameForm;
 
 public class MazeGame {
     public static void main(String[] args) {

@@ -1,7 +1,8 @@
-package mazeinterface;
+package game;
 
 import javax.swing.SwingUtilities;
 
+import mazeinterface.MainForm;
 import mazeinterface.mazedialog.ConversationDialog;
 
 public class CheckMazeIntro {
