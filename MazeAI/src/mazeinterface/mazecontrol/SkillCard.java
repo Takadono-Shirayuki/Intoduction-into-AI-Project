@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
+import mazeinterface.mazedialog.SkillDialog;
 import mazenv.Pair;
 import mazenv.MazeEnv.Buff;
 

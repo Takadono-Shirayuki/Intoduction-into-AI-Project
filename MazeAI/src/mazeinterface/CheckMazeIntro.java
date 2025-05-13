@@ -2,11 +2,12 @@ package mazeinterface;
 
 import javax.swing.SwingUtilities;
 
+import mazeinterface.mazedialog.ConversationDialog;
+
 public class CheckMazeIntro {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            MazeIntro intro = new MazeIntro(null);
-            intro.setVisible(true);
+            new ConversationDialog(new MainForm(), "/mazeai/MazeDialogues/intro_dialog.txt");
         });
     }
 }

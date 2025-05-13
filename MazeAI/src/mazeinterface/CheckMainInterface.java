@@ -1,6 +1,6 @@
 package mazeinterface;
 
-import mazeinterface.mazecontrol.ShadowOverlay;
+import mazeinterface.mazedialog.ShadowOverlay;
 
 public class CheckMainInterface {
     public static void main(String[] args) {

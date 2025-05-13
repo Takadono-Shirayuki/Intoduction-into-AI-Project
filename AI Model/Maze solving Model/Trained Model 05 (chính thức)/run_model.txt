@@ -1,0 +1,6 @@
+Model: model02
+Number of episodes: 50000
+Average number of steps: 50
+Max: 100
+Min: 42
+---------------------------------------------------

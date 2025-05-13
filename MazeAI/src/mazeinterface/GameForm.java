@@ -3,8 +3,8 @@ package mazeinterface;
 import javax.swing.*;
 
 import mazeinterface.mazecontrol.MazePanel;
-import mazeinterface.mazecontrol.MessageDialog;
-import mazeinterface.mazecontrol.SkillDialog;
+import mazeinterface.mazedialog.MessageDialog;
+import mazeinterface.mazedialog.SkillDialog;
 
 import java.awt.*;
 import mazenv.*;

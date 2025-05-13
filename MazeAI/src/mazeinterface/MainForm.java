@@ -2,7 +2,7 @@ package mazeinterface;
 
 import javax.swing.*;
 import mazeinterface.mazecontrol.ColorShiftButton;
-import mazeinterface.mazecontrol.ShadowOverlay;
+import mazeinterface.mazedialog.ShadowOverlay;
 
 import java.awt.*;
 
