@@ -80,8 +80,7 @@ public class MainForm extends JFrame {
     // Phương thức startGame để bắt đầu trò chơi mới hoặc tiếp tục trò chơi
     private void startGame(boolean continueGame) {
         // Tạo lớp phủ mờ dần khi bắt đầu trò chơi
-        ShadowOverlay shadowOverlay = new ShadowOverlay(this, 500, 0, ShadowOverlay.MIST_FALL);
-        shadowOverlay.setVisible(true);  // Hiển thị lớp phủ mờ dần
+        new ShadowOverlay(this, 500, 0, ShadowOverlay.MIST_FALL);
 
         int mazeSize = 30;  // Kích thước mê cung
     
@@ -93,6 +92,16 @@ public class MainForm extends JFrame {
             // Tạo trò chơi mới
             new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE);  // Tạo lớp phủ mờ dần khi bắt đầu trò chơi mới
         }
+        // Giải phóng tài nguyên sau khi mở cửa sổ trò chơi
+        new java.util.Timer().schedule(new java.util.TimerTask() {
+            @Override
+            public void run() {
+                dispose();  // Đóng cửa sổ menu
+                cancel();  // Hủy tác vụ sau khi mở cửa sổ trò chơi
+            }
+        }, 1500);  // Thời gian chờ trước khi đóng cửa sổ menu
+
+        // Đóng cửa sổ menu
         setVisible(false);  // Ẩn cửa sổ menu
     }
 

@@ -2,6 +2,7 @@ package mazeinterface.mazedialog;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 
@@ -17,10 +18,10 @@ public class SelectDialog extends JDialog{
 
     private Boolean exitOnClose = true; // Biến để xác định có đóng JFrame cha hay không
 
-    public SelectDialog(JFrame parent, String displayText, String[] options) {
+    public SelectDialog(JFrame parent, String displayText, String[] options, Dimension size) {
         super(parent, true);
         setUndecorated(true);
-        setBackground(new Color(0, 0, 0, 120));
+        setBackground(new Color(0, 0, 0, 180));
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -52,7 +53,7 @@ public class SelectDialog extends JDialog{
         // Thêm các nút lựa chọn
         for (int i = 0; i < options.length; i++) {
             String option = options[i];
-            TransparentButton optionButton = new TransparentButton(option, new Font("Arial", Font.BOLD, 20), Color.WHITE, new java.awt.Dimension(600, 50));
+            TransparentButton optionButton = new TransparentButton(option, new Font("Arial", Font.BOLD, 20), Color.WHITE, size);
             final int index = i; // Biến final để sử dụng trong ActionListener
             optionButton.addActionListener(e -> {
                 returnValue = index; // Lưu lại giá trị lựa chọn

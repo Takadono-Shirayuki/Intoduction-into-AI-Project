@@ -4,6 +4,8 @@ import javax.swing.*;
 
 import mazeinterface.mazecontrol.MazePanel;
 import mazeinterface.mazedialog.MessageDialog;
+import mazeinterface.mazedialog.SelectDialog;
+import mazeinterface.mazedialog.ShadowOverlay;
 import mazeinterface.mazedialog.SkillDialog;
 
 import java.awt.*;
@@ -59,14 +61,53 @@ public class GameForm extends JFrame {
 
         // Tạo nút cài đặt
         JButton settingBtn = new JButton("⚙");
-        settingBtn.setPreferredSize(new Dimension(50, 40));
-        JPopupMenu settingMenu = new JPopupMenu();
-        settingMenu.add(new JMenuItem("Retry"));
-        settingMenu.add(new JMenuItem("Load"));
-        settingMenu.add(new JMenuItem("Save"));
-        settingMenu.add(new JMenuItem("Home"));
 
-        settingBtn.addActionListener(e -> settingMenu.show(settingBtn, 0, settingBtn.getHeight()));
+        settingBtn.addActionListener(e -> {
+            String options[] = {"Tiếp tục", "Chơi lại", "Trang chủ", "Trợ giúp", "Thoát"};
+            int selection = new SelectDialog(this, "Cài đặt", options, new Dimension(200, 50)).returnValue;
+            switch (selection) {
+                case 0: // Tiếp tục
+                    break;
+                case 1: // Chơi lại
+                    // Tạo lớp phủ mờ dần khi bắt đầu trò chơi
+                    new ShadowOverlay(this, 500, 0, ShadowOverlay.MIST_FALL);
+                    new Timer().schedule(new java.util.TimerTask() {
+                        @Override
+                        public void run() {
+                            mazePanel.resetGame();
+                            new ShadowOverlay(GameForm.this, 500, 500, ShadowOverlay.MIST_RISE);
+                            GameForm.this.mazePanel.useSkill(GameForm.this.openSkillDialog());
+                            cancel(); // Hủy tác vụ sau khi mở hộp thoại kỹ năng
+                        }
+                    }, 300);
+                    break;
+                case 2: // Trang chủ
+                    // Đóng cửa sổ hiện tại và mở cửa sổ chính
+                    new ShadowOverlay(this, 300, 0, ShadowOverlay.MIST_FALL);
+                    new ShadowOverlay(new MainForm(), 500, 1000, ShadowOverlay.MIST_RISE);
+                    new Timer().schedule(new java.util.TimerTask() {
+                        @Override
+                        public void run() {
+                            dispose(); // Đóng cửa sổ hiện tại
+                            cancel(); // Hủy tác vụ sau khi mở MainForm
+                        }
+                    }, 1500);
+                    new Timer().schedule(new java.util.TimerTask() {
+                        @Override
+                        public void run() {
+                            setVisible(false); // Ẩn cửa sổ hiện tại
+                            cancel(); // Hủy tác vụ sau khi ẩn cửa sổ
+                        }
+                    }, 1000);
+                    break;
+                case 3: // Trợ giúp
+                    break;
+                case 4: // Thoát
+                    System.exit(0);
+                    break;
+            }
+            mazePanel.requestFocusInWindow(); // Đặt lại focus cho mazePanel sau khi hiển thị menu
+        });
         topLeftPanel.add(settingBtn);
 
         add(topLeftPanel, BorderLayout.NORTH);

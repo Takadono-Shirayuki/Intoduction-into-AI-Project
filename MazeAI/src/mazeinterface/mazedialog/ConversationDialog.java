@@ -87,10 +87,9 @@ public class ConversationDialog extends JDialog {
         
         public void run() {
             // Hiện hộp thoại nhập liệu
-            String input = new InputDialog(parent, GameVariable.format(displayText)).returnValue; // Lấy giá trị nhập vào
+            String input = new InputDialog(parent, GameVariable.format(displayText), new Dimension(600, 50)).returnValue; // Lấy giá trị nhập vào
             if (input != null) {
-                // Thay đổi giá trị biến trong game
-                // Game.setVariable(variableName, input);
+                GameVariable.setVariable(variableName, input); // Thay đổi giá trị biến trong game
             }
             commandIndex++; // Tăng chỉ số câu thoại
             processNextCommand(); // Hiện câu thoại tiếp theo
@@ -139,11 +138,10 @@ public class ConversationDialog extends JDialog {
                 selections[i] = GameVariable.format(options[i].displayText); // Lấy văn bản hiển thị
             }
 
-            int selectedOption = new SelectDialog(parent, GameVariable.format(displayText), selections).returnValue; // Lấy giá trị lựa chọn
+            int selectedOption = new SelectDialog(parent, GameVariable.format(displayText), selections, new Dimension(600, 50)).returnValue; // Lấy giá trị lựa chọn
             if (selectedOption != -1) {
-                // Thay đổi giá trị biến trong game
-                // Game.setVariable(options[selectedOption].variableName, options[selectedOption].variableValue);
                 Option selected = options[selectedOption]; // Lấy tùy chọn đã chọn
+                GameVariable.setVariable(selected.variableName, selected.variableValue); // Thay đổi giá trị biến trong game
                 if (selected.nextCommandIndex != -1) {
                     commandIndex = selected.nextCommandIndex; // Đổi chỉ số câu thoại
                 } else {

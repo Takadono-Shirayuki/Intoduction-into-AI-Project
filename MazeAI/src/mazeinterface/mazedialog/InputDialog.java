@@ -10,6 +10,7 @@ import javax.swing.SwingConstants;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 
 import mazeinterface.mazecontrol.TransparentButton;
@@ -17,10 +18,10 @@ public class InputDialog extends JDialog {
     public String returnValue = null;
     
     private Boolean exitOnClose = true; // Biến để xác định có đóng JFrame cha hay không
-    public InputDialog(JFrame parent, String displayText) {
+    public InputDialog(JFrame parent, String displayText, Dimension size) {
         super(parent, true);
         setUndecorated(true);
-        setBackground(new Color(0, 0, 0, 120));
+        setBackground(new Color(0, 0, 0, 180));
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -45,7 +46,6 @@ public class InputDialog extends JDialog {
         displayTextLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         displayTextLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
         displayTextLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        displayTextLabel.setSize(300, 50); // Kích thước của JLabel
         displayTextLabel.setLocation((getWidth() - displayTextLabel.getWidth()) / 2, parent.getHeight() / 2 - 120); // Đặt vị trí của JLabel
         contentPane.add(displayTextLabel);
 
@@ -56,7 +56,7 @@ public class InputDialog extends JDialog {
         inputField.setHorizontalAlignment(SwingConstants.CENTER);
         inputField.setBorder(null); // Bỏ viền
         inputField.setOpaque(false); // Đặt nền trong suốt
-        inputField.setSize(600, 50); // Kích thước của JTextField
+        inputField.setSize(size); // Kích thước của JTextField
         inputField.setLocation((getWidth() - inputField.getWidth()) / 2, parent.getHeight() / 2 - 60); // Đặt vị trí của JTextField
         inputField.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
@@ -71,7 +71,7 @@ public class InputDialog extends JDialog {
         contentPane.add(inputField);
 
         // Thêm nút xác nhận
-        TransparentButton confirmButton = new TransparentButton("Xác nhận", new Font("Arial", Font.BOLD, 20), Color.WHITE, new java.awt.Dimension(600, 50));
+        TransparentButton confirmButton = new TransparentButton("Xác nhận", new Font("Arial", Font.BOLD, 20), Color.WHITE, size);
         confirmButton.setLocation((getWidth() - confirmButton.getWidth()) / 2, parent.getHeight() / 2); // Đặt vị trí của nút
         confirmButton.addActionListener(e -> {
             returnValue = inputField.getText(); // Lưu lại giá trị nhập vào

@@ -52,6 +52,12 @@ public class MazePanel extends JPanel {
         });
     }
 
+    public void resetGame() {
+        mazeEnv.gameOver();
+        stepCounter = 0;
+        repaint();
+    }
+
     /**
      * Xử lý sự kiện phím bấm để di chuyển người chơi.
      * @param e Sự kiện KeyEvent
