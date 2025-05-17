@@ -45,6 +45,7 @@ public class InputDialog extends JDialog {
         displayTextLabel.setVerticalAlignment(JLabel.CENTER);
         displayTextLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         displayTextLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
+        displayTextLabel.setSize(size);
         displayTextLabel.setFont(new Font("Arial", Font.BOLD, 20));
         displayTextLabel.setLocation((getWidth() - displayTextLabel.getWidth()) / 2, parent.getHeight() / 2 - 120); // Đặt vị trí của JLabel
         contentPane.add(displayTextLabel);

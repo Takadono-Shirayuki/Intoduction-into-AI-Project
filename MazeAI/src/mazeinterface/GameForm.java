@@ -3,6 +3,8 @@ package mazeinterface;
 import java.awt.*;
 import java.util.Timer;
 import javax.swing.*;
+
+import game.Main;
 import mazeinterface.mazecontrol.InfoPanel;
 import mazeinterface.mazecontrol.MazePanel;
 import mazeinterface.mazedialog.MessageDialog;
@@ -24,6 +26,7 @@ public class GameForm extends JFrame {
     public GameForm(int mazeSize) {
         // Khởi tạo JFrame
         super();
+        Main.setGameForm(this);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         setUndecorated(true); // Bỏ bỏ thanh tiêu đề

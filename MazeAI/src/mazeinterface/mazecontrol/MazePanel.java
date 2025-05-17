@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Random;
 import javax.swing.*;
+
+import game.Main;
 import mazeinterface.GameForm;
 import mazenv.*;
 import mazenv.MazeEnv.Debuff;
@@ -22,6 +24,8 @@ public class MazePanel extends JPanel {
     private Image playerIcon; // ảnh người chơi
 
     public MazePanel(int mazeSize, MazeEnv mazeEnv, GameForm parent) {
+        Main.setMazePanel(this);
+        
         this.mazeSize = mazeSize;
         this.mazeEnv = mazeEnv;
         this.parent = parent;
@@ -62,7 +66,7 @@ public class MazePanel extends JPanel {
         }
     }
 
-    public void movePlayer(int action) {
+    public Pair<MazeState, Boolean> movePlayer(int action) {
         Pair<MazeState, Boolean> stepState = mazeEnv.step(action);
         if (stepState.getItem2()) {
             stepCounter++;
@@ -88,7 +92,7 @@ public class MazePanel extends JPanel {
                     List<Integer> debuffs = Debuff.getDebuffList();
                     Random random = new Random();
                     debuff = debuffs.get(random.nextInt(debuffs.size()));
-                    Pair<String, String> debuffInfo = Debuff.getBuffInfo(debuff);
+                    Pair<String, String> debuffInfo = Debuff.getDebuffInfo(debuff);
                     String message = "<html><div style='text-align: center;'>" + debuffInfo.getItem1() + "</div><br>" +
                             debuffInfo.getItem2().replace("\n", "<br>") + "</html>";
                     parent.showMessage(message, new Dimension(400, 250));
@@ -97,9 +101,9 @@ public class MazePanel extends JPanel {
                 mazeEnv.regenerateMaze(buff, debuff);
                 stepCounter = 0;
             }
-
             repaint();
         }
+        return stepState;
     }
 
     public void toggleFullView() {

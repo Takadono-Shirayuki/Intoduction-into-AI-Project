@@ -44,54 +44,53 @@ public class MazeEnv {
          */
         public static final int TOU_NO_HIKARI = 2;
         /**
-         * Buff tăng số lượng đường đi đến đích.
-         */
-        public static final int UNMEI_NO_MICHI = 3;
-        /**
          * Buff tìm kiếm đường có thể đi xung quanh tác tử.
          */
-        public static final int SLIME_SAN_ONEGAI = 4;
+        public static final int SLIME_SAN_ONEGAI = 3;
+        /**
+         * Buff tăng số lượng đường đi đến đích.
+         */
+        public static final int UNMEI_NO_MICHI = 4;
 
         public static final int SLIME_STEP = 100;
         public static final int TOU_NO_HIKARI_OBS = 8;
 
-        private static final String SENRIGAN_DOC = "/src/mazeai/Document/Senrigan.txt";
-        private static final String SLIME_SAN_ONEGAI_DOC = "/src/mazeai/Document/SlimeSanOnegai.txt";
-        private static final String TOU_NO_HIKARI_DOC = "/src/mazeai/Document/TouNoHikari.txt";
-        private static final String UNMEI_NO_MICHI_DOC = "/src/mazeai/Document/UnmeiNoMichi.txt";
+        private static final String SENRIGAN_DOC = "/mazeai/Document/Senrigan.txt";
+        private static final String SLIME_SAN_ONEGAI_DOC = "/mazeai/Document/SlimeSanOnegai.txt";
+        private static final String TOU_NO_HIKARI_DOC = "/mazeai/Document/TouNoHikari.txt";
+        private static final String UNMEI_NO_MICHI_DOC = "/mazeai/Document/UnmeiNoMichi.txt";
         /**
          * Lấy tài liệu mô tả kỹ năng từ đường dẫn.
          * @param path Đường dẫn đến tài liệu
          * @return Tên và mô tả kỹ năng dưới dạng Pair
          */
         public static Pair<String, String> getBuffInfo(int buff) {
-    String fileName = switch (buff) {
-        case Buff.SENRIGAN -> "Senrigan.txt";
-        case Buff.SLIME_SAN_ONEGAI -> "SlimeSanOnegai.txt";
-        case Buff.TOU_NO_HIKARI -> "TouNoHikari.txt";
-        case Buff.UNMEI_NO_MICHI -> "UnmeiNoMichi.txt";
-        default -> null;
-    };
+            String fileName = switch (buff) {
+                case Buff.SENRIGAN -> SENRIGAN_DOC;
+                case Buff.SLIME_SAN_ONEGAI -> SLIME_SAN_ONEGAI_DOC;
+                case Buff.TOU_NO_HIKARI -> TOU_NO_HIKARI_DOC;
+                case Buff.UNMEI_NO_MICHI -> UNMEI_NO_MICHI_DOC;
+                default -> null;
+            };
 
-    if (fileName == null) return null;
+            if (fileName == null) return null;
 
-    try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(Buff.class.getResourceAsStream("/mazeai/Document/" + fileName), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(Buff.class.getResourceAsStream(fileName), StandardCharsets.UTF_8))) {
 
-        String title = reader.readLine();
-        StringBuilder description = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            description.append(line).append("\n");
+                String title = reader.readLine();
+                StringBuilder description = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    description.append(line).append("\n");
+                }
+                return new Pair<>(title, description.toString().trim());
+
+            } catch (Exception e) {
+                System.err.println("Không thể đọc tài liệu: " + fileName);
+                return null;
+            }
         }
-        return new Pair<>(title, description.toString().trim());
-
-    } catch (Exception e) {
-        System.err.println("Không thể đọc tài liệu: " + fileName);
-        return null;
-    }
-}
-
     }
 
     /**
@@ -135,44 +134,42 @@ public class MazeEnv {
          * @param path Đường dẫn đến tài liệu
          * @return Tên và mô tả debuff dưới dạng Pair
          */
-         public static Pair<String, String> getBuffInfo(int buff) {
-    String path = "";
-    switch (buff) {
-        case Buff.SENRIGAN:
-            path = "/src/mazeai/Document/Senrigan.txt";
-            break;
-        case Buff.SLIME_SAN_ONEGAI:
-            path = "/src/mazeai/Document/SlimeSanOnegai.txt";
-            break;
-        case Buff.TOU_NO_HIKARI:
-            path = "/src/mazeai/Document/TouNoHikari.txt";
-            break;
-        case Buff.UNMEI_NO_MICHI:
-            path = "/src/mazeai/Document/UnmeiNoMichi.txt";
-            break;
-        default:
-            return null;
-    }
+         public static Pair<String, String> getDebuffInfo(int debuff) {
+            String path = "";
+            switch (debuff) {
+                case WAAMU_HOURU:
+                    path = WAAMU_HOURU_DOC;
+                    break;
+                case SHIN_NO_MEIRO:
+                    path = SHIN_NO_MEIRO_DOC;
+                    break;
+                case SHUU_MATSU_DO_KEI:
+                    path = SHUU_MATSU_DO_KEI_DOC;
+                    break;
+                default:
+                    System.err.println("Không tìm thấy tài liệu cho debuff: " + debuff);
+                    return null;
+            }
 
-    String skillName, skillDescription;
+            String skillName, skillDescription;
 
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(System.getProperty("user.dir") + path), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(System.getProperty("user.dir") + path), StandardCharsets.UTF_8))) {
 
-        skillName = reader.readLine();
+                skillName = reader.readLine();
 
-        StringBuilder descriptionBuilder = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            descriptionBuilder.append(line).append("\n");
+                StringBuilder descriptionBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    descriptionBuilder.append(line).append("\n");
+                }
+                skillDescription = descriptionBuilder.toString().trim();
+            } catch (IOException e) {
+                System.err.println("Không thể đọc tài liệu: " + path);
+                return null;
+            }
+
+            return new Pair<>(skillName, skillDescription);
         }
-        skillDescription = descriptionBuilder.toString().trim();
-    } catch (IOException e) {
-        System.err.println("Không thể đọc tài liệu: " + path);
-        return null;
-    }
-
-    return new Pair<>(skillName, skillDescription);
-}
     }
 
     private Maze maze;

@@ -2,6 +2,8 @@ package mazeinterface.mazecontrol;
 
 import java.awt.*;
 import javax.swing.*;
+
+import game.Main;
 /**
  * Class InfoPanel hiển thị các thông tin ở bên trái mê cung 
  * Các thông tin hiển thị gồm số tầng (level) hiện tại, số bước đến khi reset, tỉ lệ nhận buff
@@ -10,6 +12,8 @@ import javax.swing.*;
 public class InfoPanel extends JPanel {
 
     public InfoPanel() {
+        Main.setInfoPanel(this);
+        
         // Kích cỡ panel
         setPreferredSize(new Dimension(300, 900));
 

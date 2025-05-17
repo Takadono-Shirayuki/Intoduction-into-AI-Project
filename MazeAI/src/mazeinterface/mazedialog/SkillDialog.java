@@ -44,8 +44,8 @@ public class SkillDialog extends JDialog {
 
         skillCard = new SkillCard[4];
         skillCard[0] = new SkillCard(this, Buff.SENRIGAN);
-        skillCard[1] = new SkillCard(this, Buff.SLIME_SAN_ONEGAI);
         skillCard[2] = new SkillCard(this, Buff.TOU_NO_HIKARI);
+        skillCard[1] = new SkillCard(this, Buff.SLIME_SAN_ONEGAI);
         skillCard[3] = new SkillCard(this, Buff.UNMEI_NO_MICHI);
 
         for (SkillCard card : skillCard) {

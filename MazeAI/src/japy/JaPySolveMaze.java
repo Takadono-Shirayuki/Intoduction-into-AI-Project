@@ -1,13 +1,8 @@
 package japy;
-
-import mazeinterface.mazecontrol.MazePanel;
 public class JaPySolveMaze {
     private JaPy jaPy;
-    private MazePanel mazePanel;
-    
 
-    public JaPySolveMaze(String pythonScriptFilePath, MazePanel mazePanel) {
-        this.mazePanel = mazePanel;
+    public JaPySolveMaze(String pythonScriptFilePath) {
         this.jaPy = new JaPy(pythonScriptFilePath, true);
     }
 
