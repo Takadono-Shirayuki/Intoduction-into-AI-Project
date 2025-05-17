@@ -1,10 +1,9 @@
 package mazenv;
 
 import java.awt.Point;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class MazeEnv {
     /**
@@ -66,40 +65,33 @@ public class MazeEnv {
          * @return Tên và mô tả kỹ năng dưới dạng Pair
          */
         public static Pair<String, String> getBuffInfo(int buff) {
-            String path = "";
-            switch (buff) {
-                case Buff.SENRIGAN:
-                    path = SENRIGAN_DOC;
-                    break;
-                case Buff.SLIME_SAN_ONEGAI:
-                    path = SLIME_SAN_ONEGAI_DOC;
-                    break;
-                case Buff.TOU_NO_HIKARI:
-                    path = TOU_NO_HIKARI_DOC;
-                    break;
-                case Buff.UNMEI_NO_MICHI:   
-                    path = UNMEI_NO_MICHI_DOC;
-                    break;
-                default:
-                    break;
-            }
-            String skillName, skillDescription;
-            
-            try (BufferedReader reader = new BufferedReader(new FileReader(System.getProperty("user.dir") + path))) {
-                skillName = reader.readLine(); // Đọc dòng đầu tiên là tên kỹ năng
-                
-                StringBuilder descriptionBuilder = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    descriptionBuilder.append(line).append("\n"); // Đọc các dòng tiếp theo là mô tả kỹ năng
-                }
-                skillDescription = descriptionBuilder.toString().trim(); // Chuyển đổi thành chuỗi và loại bỏ khoảng trắng thừa
-            } catch (IOException e) {
-                System.err.println("Không thể đọc tài liệu: " + path);
-                return null;
-            }
-            return new Pair<String, String>(skillName, skillDescription); // Trả về tên và mô tả kỹ năng
+    String fileName = switch (buff) {
+        case Buff.SENRIGAN -> "Senrigan.txt";
+        case Buff.SLIME_SAN_ONEGAI -> "SlimeSanOnegai.txt";
+        case Buff.TOU_NO_HIKARI -> "TouNoHikari.txt";
+        case Buff.UNMEI_NO_MICHI -> "UnmeiNoMichi.txt";
+        default -> null;
+    };
+
+    if (fileName == null) return null;
+
+    try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(Buff.class.getResourceAsStream("/mazeai/Document/" + fileName), StandardCharsets.UTF_8))) {
+
+        String title = reader.readLine();
+        StringBuilder description = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            description.append(line).append("\n");
         }
+        return new Pair<>(title, description.toString().trim());
+
+    } catch (Exception e) {
+        System.err.println("Không thể đọc tài liệu: " + fileName);
+        return null;
+    }
+}
+
     }
 
     /**
@@ -144,37 +136,43 @@ public class MazeEnv {
          * @return Tên và mô tả debuff dưới dạng Pair
          */
          public static Pair<String, String> getBuffInfo(int buff) {
-            String path = "";
-            switch (buff) {
-                case Debuff.WAAMU_HOURU:
-                    path = WAAMU_HOURU_DOC;
-                    break;
-                case Debuff.SHIN_NO_MEIRO:
-                    path = SHIN_NO_MEIRO_DOC;
-                    break;
-                case Debuff.SHUU_MATSU_DO_KEI:
-                    path = SHUU_MATSU_DO_KEI_DOC;
-                    break;
-                default:
-                    break;
-            }
-            String debuffName, debuffDescription;
-            
-            try (BufferedReader reader = new BufferedReader(new FileReader(System.getProperty("user.dir") + path))) {
-                debuffName = reader.readLine(); // Đọc dòng đầu tiên là tên kỹ năng
-                
-                StringBuilder descriptionBuilder = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    descriptionBuilder.append(line).append("\n"); // Đọc các dòng tiếp theo là mô tả kỹ năng
-                }
-                debuffDescription = descriptionBuilder.toString().trim(); // Chuyển đổi thành chuỗi và loại bỏ khoảng trắng thừa
-            } catch (IOException e) {
-                System.err.println("Không thể đọc tài liệu: " + path);
-                return null;
-            }
-            return new Pair<String, String>(debuffName, debuffDescription); // Trả về tên và mô tả kỹ năng
+    String path = "";
+    switch (buff) {
+        case Buff.SENRIGAN:
+            path = "/src/mazeai/Document/Senrigan.txt";
+            break;
+        case Buff.SLIME_SAN_ONEGAI:
+            path = "/src/mazeai/Document/SlimeSanOnegai.txt";
+            break;
+        case Buff.TOU_NO_HIKARI:
+            path = "/src/mazeai/Document/TouNoHikari.txt";
+            break;
+        case Buff.UNMEI_NO_MICHI:
+            path = "/src/mazeai/Document/UnmeiNoMichi.txt";
+            break;
+        default:
+            return null;
+    }
+
+    String skillName, skillDescription;
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(System.getProperty("user.dir") + path), StandardCharsets.UTF_8))) {
+
+        skillName = reader.readLine();
+
+        StringBuilder descriptionBuilder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            descriptionBuilder.append(line).append("\n");
         }
+        skillDescription = descriptionBuilder.toString().trim();
+    } catch (IOException e) {
+        System.err.println("Không thể đọc tài liệu: " + path);
+        return null;
+    }
+
+    return new Pair<>(skillName, skillDescription);
+}
     }
 
     private Maze maze;

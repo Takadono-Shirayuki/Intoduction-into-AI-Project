@@ -8,17 +8,15 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-
 import mazeinterface.mazedialog.SkillDialog;
-import mazenv.Pair;
 import mazenv.MazeEnv.Buff;
+import mazenv.Pair;
 
 public class SkillCard extends JPanel {
     private static final String SENRIGAN_ICON = "Icon/Senrigan.jpg";
@@ -60,7 +58,13 @@ public class SkillCard extends JPanel {
             default:
                 break;
         }
-        Pair<String, String> doc = Buff.getBuffInfo(skillBuff); // Lấy thông tin kỹ năng từ mã kỹ năng
+        Pair<String, String> doc = Buff.getBuffInfo(skillBuff);
+
+         if (doc == null) {
+    System.err.println("Không tìm thấy mô tả cho kỹ năng: " + skillBuff);
+    doc = new Pair<>("Không rõ", "Không có mô tả cho kỹ năng này.");
+        }
+ // Lấy thông tin kỹ năng từ mã kỹ năng
 
         // Tạo icon kỹ năng 
         ImageIcon icon = createRoundedIcon(iconPath, 100);

@@ -1,22 +1,22 @@
 package mazeinterface;
 
+import java.awt.*;
+import java.util.Timer;
 import javax.swing.*;
-
+import mazeinterface.mazecontrol.InfoPanel;
 import mazeinterface.mazecontrol.MazePanel;
 import mazeinterface.mazedialog.MessageDialog;
 import mazeinterface.mazedialog.SelectDialog;
 import mazeinterface.mazedialog.ShadowOverlay;
 import mazeinterface.mazedialog.SkillDialog;
-
-import java.awt.*;
 import mazenv.*;
 import mazenv.MazeEnv.Buff;
-import java.util.Timer;
 
 public class GameForm extends JFrame {
     private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/GameBackground.jpg";  // Đường dẫn đến ảnh nền
     private MazePanel mazePanel;
     private SkillDialog skillDialog;
+
     /**
      * Khởi tạo giao diện chính của trò chơi mê cung
      * @param mazeSize Kích thước mê cung
@@ -28,7 +28,7 @@ public class GameForm extends JFrame {
         setLayout(new BorderLayout());
         setUndecorated(true); // Bỏ bỏ thanh tiêu đề
         setResizable(false); // Không cho phép thay đổi kích thước cửa sổ
-        
+
         // Tạo một JPanel với hình nền
         try {
             ImageIcon bgIcon = new ImageIcon(getClass().getResource(BACKGROUND_IMAGE_PATH));
@@ -45,19 +45,20 @@ public class GameForm extends JFrame {
             System.err.println("Không thể tải background");
         }
 
-        // Khởi tạo MazePanel và thêm vào JFrame
+        // Khởi tạo MazePanel và InfoPanel, sau đó đưa vào JPanel chung
         MazeEnv mazeEnv = new MazeEnv(mazeSize, 15, 60, Buff.SLIME_STEP, Buff.TOU_NO_HIKARI_OBS);
         mazePanel = new MazePanel(mazeSize, mazeEnv, this);
-
-        JPanel container = new JPanel(new GridBagLayout());
-        container.setOpaque(false);
-        container.add(mazePanel);
-        container.setPreferredSize(new Dimension(mazePanel.getWidth(), mazePanel.getHeight()));
-        add(container, BorderLayout.CENTER);
         
+        InfoPanel infoPanel = new InfoPanel();
+        JPanel combinedPanel = new JPanel(new BorderLayout());
+        combinedPanel.setOpaque(false);
+        combinedPanel.add(infoPanel, BorderLayout.WEST);
+        combinedPanel.add(mazePanel, BorderLayout.CENTER);
+        add(combinedPanel, BorderLayout.CENTER);
+
         // Tạo một JPanel cho các nút điều khiển
-        JPanel topLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        topLeftPanel.setOpaque(false);
+        JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topRightPanel.setOpaque(false);
 
         // Tạo nút cài đặt
         JButton settingBtn = new JButton("⚙");
@@ -69,7 +70,6 @@ public class GameForm extends JFrame {
                 case 0: // Tiếp tục
                     break;
                 case 1: // Chơi lại
-                    // Tạo lớp phủ mờ dần khi bắt đầu trò chơi
                     new ShadowOverlay(this, 500, 0, ShadowOverlay.MIST_FALL);
                     new Timer().schedule(new java.util.TimerTask() {
                         @Override
@@ -77,26 +77,25 @@ public class GameForm extends JFrame {
                             mazePanel.resetGame();
                             new ShadowOverlay(GameForm.this, 500, 500, ShadowOverlay.MIST_RISE);
                             GameForm.this.mazePanel.useSkill(GameForm.this.openSkillDialog());
-                            cancel(); // Hủy tác vụ sau khi mở hộp thoại kỹ năng
+                            cancel();
                         }
                     }, 300);
                     break;
                 case 2: // Trang chủ
-                    // Đóng cửa sổ hiện tại và mở cửa sổ chính
                     new ShadowOverlay(this, 300, 0, ShadowOverlay.MIST_FALL);
                     new ShadowOverlay(new MainForm(), 500, 1000, ShadowOverlay.MIST_RISE);
                     new Timer().schedule(new java.util.TimerTask() {
                         @Override
                         public void run() {
-                            dispose(); // Đóng cửa sổ hiện tại
-                            cancel(); // Hủy tác vụ sau khi mở MainForm
+                            dispose();
+                            cancel();
                         }
                     }, 1500);
                     new Timer().schedule(new java.util.TimerTask() {
                         @Override
                         public void run() {
-                            setVisible(false); // Ẩn cửa sổ hiện tại
-                            cancel(); // Hủy tác vụ sau khi ẩn cửa sổ
+                            setVisible(false);
+                            cancel();
                         }
                     }, 1000);
                     break;
@@ -106,11 +105,11 @@ public class GameForm extends JFrame {
                     System.exit(0);
                     break;
             }
-            mazePanel.requestFocusInWindow(); // Đặt lại focus cho mazePanel sau khi hiển thị menu
+            mazePanel.requestFocusInWindow();
         });
-        topLeftPanel.add(settingBtn);
+        topRightPanel.add(settingBtn);
 
-        add(topLeftPanel, BorderLayout.NORTH);
+        add(topRightPanel, BorderLayout.NORTH);
 
         // Thay đổi kích thước của MazePanel để vừa với kích thước của JFrame
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -118,45 +117,45 @@ public class GameForm extends JFrame {
                 mazePanel.adjustScaleToFit();
             }
         });
+
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
+
         // Mở hộp thoại kỹ năng khi bắt đầu trò chơi
         new Timer().schedule(new java.util.TimerTask() {
-            @Override
-            public void run() {
-                skillDialog = new SkillDialog(GameForm.this);
-                mazePanel.useSkill(openSkillDialog());
-                cancel(); // Hủy tác vụ sau khi mở hộp thoại kỹ năng
-            }
+    @Override
+    public void run() {
+        skillDialog = new SkillDialog(GameForm.this);
+        mazePanel.useSkill(openSkillDialog());
+        cancel();
+    }
         }, 0);
+
     }
 
     public MazePanel getMazePanel() {
         return mazePanel;
     }
 
-    public int openSkillDialog()
-    {
-        // Tạo danh sách các kỹ năng có thể chọn
-        // Loại bỏ ngẫu nhiên một kỹ năng khỏi danh sách
-        int randint = (int) (Math.random() * 4); // Tạo số ngẫu nhiên từ 0 đến 3
+    public int openSkillDialog() {
+        int randint = (int) (Math.random() * 4);
         int buffList[] = {Buff.SENRIGAN, Buff.SLIME_SAN_ONEGAI, Buff.TOU_NO_HIKARI, Buff.UNMEI_NO_MICHI};
         int skillBuff[] = new int[buffList.length - 1];
         int skillCount = 0;
         for (int i = 0; i < buffList.length; i++) {
             if (i != randint) {
-                skillBuff[skillCount++] = buffList[i]; // Thêm các kỹ năng khác vào danh sách
+                skillBuff[skillCount++] = buffList[i];
             }
         }
         skillDialog.ShowDialog(skillBuff);
         int selectedSkill = skillDialog.selectedSkill;
-        skillDialog.selectedSkill = Buff.NONE; // Đặt lại kỹ năng đã chọn về NONE
-        skillDialog.Click_SkillCard(Buff.NONE); // Đặt lại kỹ năng tạm thời về NONE
-        return selectedSkill; // Trả về kỹ năng đã chọn
+        skillDialog.selectedSkill = Buff.NONE;
+        skillDialog.Click_SkillCard(Buff.NONE);
+        return selectedSkill;
     }
 
     public void showMessage(String message, Dimension size) {
         new MessageDialog(this, message, size);
-        mazePanel.requestFocusInWindow(); // Đặt lại focus cho mazePanel sau khi hiển thị thông báo
+        mazePanel.requestFocusInWindow();
     }
 }

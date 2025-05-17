@@ -1,8 +1,8 @@
 {
-    "java.debug.settings.onBuildFailureProceed": true
+  "java.debug.settings.onBuildFailureProceed": true,
+  "files.exclude": {
+    "**/*.class": true
+  },
+  "files.encoding": "utf8",
+  "java.debug.settings.vmArgs": "-Dfile.encoding=UTF-8"
 }
-{
-    "files.exclude": {
-      "**/*.class": true
-    }
-  }
