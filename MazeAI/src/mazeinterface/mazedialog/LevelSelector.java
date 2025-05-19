@@ -6,11 +6,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.nio.file.*;
-import java.util.*;
 import java.util.List;
+import java.util.ArrayList;
+
 
 public class LevelSelector extends JDialog {
 
+    private File[] levelDirs;
     private File[] scriptFiles;
     private int selectedIndex = -1;
     private JButton[] levelButtons;
@@ -34,31 +36,39 @@ public class LevelSelector extends JDialog {
         contentPanel.setOpaque(false);
         setContentPane(contentPanel);
 
-        // Load scripts
+        // Load level folders
         File scriptDir = Paths.get(System.getProperty("user.dir"), "scripts").toFile();
-        scriptFiles = scriptDir.listFiles((dir, name) -> name.endsWith(".py"));
-
-        // Load button labels from text file
-        List<String> levelNames = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("src/mazeai/Document/levelnames.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (!line.trim().isEmpty()) levelNames.add(line.trim());
-            }
-        } catch (IOException e) {
-            showError("Lỗi đọc file levelnames.txt: " + e.getMessage());
+        File[] subDirs = scriptDir.listFiles(File::isDirectory);
+        if (subDirs == null || subDirs.length == 0) {
+            showError("Không tìm thấy thư mục cấp độ trong scripts/");
             return;
         }
 
-        int total = Math.min(scriptFiles.length, levelNames.size());
-        levelButtons = new JButton[total];
+        List<File> validScripts = new ArrayList<>();
+        List<String> levelNames = new ArrayList<>();
+
+        for (File dir : subDirs) {
+            File[] pyFiles = dir.listFiles((d, name) -> name.endsWith(".py"));
+            if (pyFiles != null && pyFiles.length == 1) {
+                validScripts.add(pyFiles[0]);
+                levelNames.add(dir.getName());
+            }
+        }
+
+        if (validScripts.isEmpty()) {
+            showError("Không tìm thấy script hợp lệ trong các thư mục.");
+            return;
+        }
+
+        scriptFiles = validScripts.toArray(new File[0]);
+        levelButtons = new JButton[scriptFiles.length];
 
         Font btnFont = new Font("SansSerif", Font.BOLD, 20);
         Color btnStart = new Color(30, 30, 30);
         Color btnEnd = new Color(70, 70, 70);
         Dimension btnSize = new Dimension(300, 45);
 
-        // Create a center panel that holds all elements centered
+        int total = scriptFiles.length;
         int centerPanelWidth = 400;
         int centerPanelHeight = total * 60 + 130;
         JPanel centerPanel = new JPanel(null);
@@ -115,7 +125,6 @@ public class LevelSelector extends JDialog {
         updateButtonStyles();
 
         contentPanel.add(centerPanel);
-        // Gỡ bỏ setVisible khỏi constructor
     }
 
     private void updateButtonStyles() {
