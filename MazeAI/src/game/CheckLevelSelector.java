@@ -2,12 +2,12 @@ package game;
 
 import javax.swing.SwingUtilities;
 import mazeinterface.MainForm;
-import mazeinterface.mazedialog.LevelSelector;
+import mazeinterface.mazedialog.ChooseCompanionDialog;
 
 public class CheckLevelSelector {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new LevelSelector(new MainForm()).setVisible(true);
+            new ChooseCompanionDialog(new MainForm()).setVisible(true);
         });
     }
 }

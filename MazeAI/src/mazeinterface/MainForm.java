@@ -1,6 +1,7 @@
 package mazeinterface;
 
 import javax.swing.*;
+import game.GameVariable;
 import mazeinterface.mazecontrol.ColorShiftButton;
 import mazeinterface.mazedialog.ShadowOverlay;
 import mazenv.MazeEnv;
@@ -9,6 +10,7 @@ import java.awt.*;
 
 public class MainForm extends JFrame {
     private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/MainBackground.jpg";  // Đường dẫn đến ảnh nền
+    
     public MainForm() {
         // Khởi tạo cửa sổ JFrame cho menu với tiêu đề và các cấu hình cơ bản
         setUndecorated(true);  // Ẩn thanh tiêu đề của cửa sổ
@@ -89,7 +91,7 @@ public class MainForm extends JFrame {
         // Nếu tiếp tục trò chơi, lấy trạng thái đã lưu
         if (continueGame) {
             try {
-                MazeEnv restoredEnv = MazeEnv.loadEnv("saved_env.dat");
+                MazeEnv restoredEnv = MazeEnv.loadEnv(GameVariable.SAVED_GAME_PATH);  // Tải trạng thái mê cung đã lưu
                 new ShadowOverlay(new GameForm(restoredEnv), 500, 0, ShadowOverlay.MIST_FALL);
             } catch(Exception e) {
                 System.out.println("ko thể tải");

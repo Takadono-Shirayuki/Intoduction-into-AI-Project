@@ -6,6 +6,7 @@ import java.util.Timer;
 import javax.swing.*;
 
 import game.Main;
+import game.GameVariable;
 import mazeinterface.mazecontrol.InfoPanel;
 import mazeinterface.mazecontrol.MazePanel;
 import mazeinterface.mazedialog.MessageDialog;
@@ -101,11 +102,10 @@ public class GameForm extends JFrame {
                     }, 300);
                     break;
                 case 2: // Trang chủ
-                        // 1) Lưu game
+                    // Lưu trạng thái hiện tại của trò chơi
                     try {
-                        mazeEnv.saveEnv("saved_env.dat");
+                        mazeEnv.saveEnv(GameVariable.SAVED_GAME_PATH);
                     } catch (IOException e1) {
-                        // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
                     new ShadowOverlay(this, 300, 0, ShadowOverlay.MIST_FALL);

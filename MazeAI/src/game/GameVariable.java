@@ -13,6 +13,8 @@ public class GameVariable {
     public static class GameVariableType {
         public static final String PlayerName = "Player Name";
     }
+    public static final String SAVED_GAME_PATH = "src/mazeai/SavedGame/SaveGame.txt";  // Đường dẫn đến tệp lưu game
+    public static final String SPOOKY_IMAGE_PATH = "/mazeai/Icon/SpookyButton.jpg";  // Đường dẫn đến ảnh Spooky
     private static String VARIABLE_DOC = "src/mazeai/Document/VariableDocument.txt";
     private static String PlayerName;
 

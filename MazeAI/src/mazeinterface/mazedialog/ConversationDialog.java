@@ -335,7 +335,7 @@ public class ConversationDialog extends JDialog {
         getContentPane().add(contentTextArea);
 
         // Nút bỏ qua đoạn giới thiệu
-        JButton skipButton = new ImageButton("/mazeai/Icon/SpookyButton.jpg", "Bỏ qua", new Font("Serif", Font.BOLD, 20), Color.WHITE, new Dimension(100, 40));
+        JButton skipButton = new ImageButton(GameVariable.SPOOKY_IMAGE_PATH, "Bỏ qua", new Font("Serif", Font.BOLD, 20), Color.WHITE, new Dimension(100, 40));
         skipButton.setBounds(getWidth() - 120, 20, 100, 40);
         skipButton.addActionListener(e -> skip());
         getContentPane().add(skipButton);

@@ -10,12 +10,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import game.GameVariable;
 import mazeinterface.mazecontrol.ImageButton;
 
 import java.awt.event.WindowAdapter;
 
 public class MessageDialog extends javax.swing.JDialog {
-    private static final String BUTTON_ICON_PATH = "/mazeai/Icon/SpookyButton.jpg";
     private int fadeDialogAlpha = 180;
     private Boolean exitOnClose = true; // Biến để xác định có đóng JFrame cha hay không
     public MessageDialog(JFrame parent, String text, Dimension size) {
@@ -51,7 +51,7 @@ public class MessageDialog extends javax.swing.JDialog {
         // Tạo một JPanel để chứa nút và đặt layout cho nó
         JPanel contentPanel = new JPanel();
         ImageButton button = new ImageButton(
-            BUTTON_ICON_PATH, // Đường dẫn đến icon của nút
+            GameVariable.SPOOKY_IMAGE_PATH, // Đường dẫn đến icon của nút
             text, // Văn bản hiển thị trên nút
             new Font("Arial", Font.BOLD, 20), // Phông chữ 
             Color.WHITE, // Màu chữ
