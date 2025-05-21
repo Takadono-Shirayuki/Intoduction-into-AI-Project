@@ -197,4 +197,9 @@ protected void paintComponent(Graphics g) {
         repaint();
         requestFocusInWindow();
     }
+    /** Cho phép cập nhật lại môi trường khi load */
+    public void setMazeEnv(MazeEnv env) {
+        this.mazeEnv = env;
+    }
+
 }

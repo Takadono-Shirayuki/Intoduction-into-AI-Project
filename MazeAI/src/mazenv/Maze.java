@@ -1,6 +1,7 @@
 package mazenv;
 
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
@@ -13,7 +14,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-public class Maze {
+public class Maze implements Serializable{
+    private static final long serialVersionUID = 1L;
+    
     public static final int WALL = -1;
     public static final int UNEXPLORED = 0;
     public static final int PATH = 1;

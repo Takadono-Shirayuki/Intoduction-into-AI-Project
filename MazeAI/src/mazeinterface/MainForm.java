@@ -3,18 +3,20 @@ package mazeinterface;
 import javax.swing.*;
 import mazeinterface.mazecontrol.ColorShiftButton;
 import mazeinterface.mazedialog.ShadowOverlay;
+import mazenv.MazeEnv;
 
 import java.awt.*;
 
 public class MainForm extends JFrame {
     private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/MainBackground.jpg";  // Đường dẫn đến ảnh nền
-
     public MainForm() {
         // Khởi tạo cửa sổ JFrame cho menu với tiêu đề và các cấu hình cơ bản
         setUndecorated(true);  // Ẩn thanh tiêu đề của cửa sổ
         setDefaultCloseOperation(EXIT_ON_CLOSE);  // Khi đóng cửa sổ, ứng dụng sẽ thoát
         setExtendedState(JFrame.MAXIMIZED_BOTH);  // Mở rộng cửa sổ ra toàn màn hình
         setResizable(false);  // Cấm thay đổi kích thước cửa sổ
+        //thêm âm thanh
+        AudioPlayer.playSingleSound(AudioPlayer.BACKGROUND_MUSIC_PATH_MAINFROM);
 
         JPanel backgroundPanel = new JPanel();  // Tạo một JPanel để chứa các thành phần giao diện
         // Tạo một JPanel với hình nền
@@ -86,11 +88,16 @@ public class MainForm extends JFrame {
     
         // Nếu tiếp tục trò chơi, lấy trạng thái đã lưu
         if (continueGame) {
-            // Có thể thêm logic để tiếp tục trò chơi từ trạng thái đã lưu
-            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE);  // Tạo lớp phủ mờ dần khi tiếp tục trò chơi
+            try {
+                MazeEnv restoredEnv = MazeEnv.loadEnv("saved_env.dat");
+                new ShadowOverlay(new GameForm(restoredEnv), 500, 0, ShadowOverlay.MIST_FALL);
+            } catch(Exception e) {
+                System.out.println("ko thể tải");
+                // fallback về game mới
+            }
         } else {
-            // Tạo trò chơi mới
-            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE);  // Tạo lớp phủ mờ dần khi bắt đầu trò chơi mới
+            // Game mới như cũ
+            new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE);
         }
         // Giải phóng tài nguyên sau khi mở cửa sổ trò chơi
         new java.util.Timer().schedule(new java.util.TimerTask() {

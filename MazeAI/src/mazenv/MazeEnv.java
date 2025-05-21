@@ -5,7 +5,7 @@ import java.util.List;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-public class MazeEnv {
+public class MazeEnv implements Serializable{
     /**
      * Các hành động có thể thực hiện trong mê cung. <p>
      * Các hành động này được sử dụng để di chuyển tác tử trong mê cung. <p>
@@ -197,18 +197,20 @@ public class MazeEnv {
         this.maze = new Maze(mazeSize, pathPercent);
         this.discoveredMaze = new DiscoveredMaze(mazeSize, maze.getDiscoverData(3), hellMode);
         this.maxStep = maxStep;
+        this.stepRemaining = maxStep;
+        this.numberOfUsedSteps = 0;
+        this.reward = 4 * mazeSize;
         this.slimeStep = slimeStep;
         this.touNoHikariObs = touNoHikariObs;
-        this.reward = 4 * mazeSize;
-        reset();
-
-        // Lưu dữ liệu khởi tạo
+        this.hellMode = hellMode;
+        // Lưu thông số gốc
         this.baseMazeSize = mazeSize;
         this.baseMaxStep = maxStep;
         this.basePathPercent = pathPercent;
         this.baseSlimeStep = slimeStep;
         this.baseTouNoHikariObs = touNoHikariObs;
-        this.hellMode = hellMode;
+
+        reset();
     }
 
     public void createDataSet(String path) {
@@ -418,4 +420,38 @@ public class MazeEnv {
         // Đặt lại mê cung về trạng thái ban đầu.
         reset();
     }
+    /**
+     * Lưu trữ toàn bộ đối tượng MazeEnv vào file nhị phân.
+     * @param filename đường dẫn file, ví dụ "saved_env.dat"
+     * @throws IOException
+     */
+    public void saveEnv(String filename) throws IOException {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
+            oos.writeObject(this);
+            System.out.println("Đã lưu môi trường vào file: " + filename);
+        }
+    }
+
+    /**
+     * Thao tác tĩnh để tải lại MazeEnv từ file đã lưu.
+     * @param filename đường dẫn file đã serialize
+     * @return đối tượng MazeEnv đã load
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static MazeEnv loadEnv(String filename) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
+            MazeEnv loaded = (MazeEnv) ois.readObject();
+            System.out.println("Đã load môi trường từ file: " + filename);
+            return loaded;
+        }
+    }
+
+    /**
+     * Trả về kích thước mê cung (mazeSize) đang dùng trong env.
+     */
+    public int getMazeSize() {
+        return this.maze.getMazeSize();
+    }
+
 }

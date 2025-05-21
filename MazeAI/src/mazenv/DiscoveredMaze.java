@@ -1,8 +1,9 @@
 package mazenv;
 
 import java.awt.Point;
+import java.io.Serializable;
 
-public class DiscoveredMaze {
+public class DiscoveredMaze implements Serializable{
     private int[][] discoveredMaze;
     private Boolean hellMode;
 

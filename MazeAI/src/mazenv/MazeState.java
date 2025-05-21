@@ -1,8 +1,9 @@
 package mazenv;
 
 import java.awt.Point;
+import java.io.Serializable;
 
-public class MazeState {
+public class MazeState implements Serializable{
     public int[][] discoveredMaze;
     public Point agentPosition;
     public Point goalPosition;

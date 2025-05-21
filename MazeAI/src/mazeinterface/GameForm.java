@@ -1,6 +1,7 @@
 package mazeinterface;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.Timer;
 import javax.swing.*;
 
@@ -18,11 +19,24 @@ public class GameForm extends JFrame {
     private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/GameBackground.jpg";  // Đường dẫn đến ảnh nền
     private MazePanel mazePanel;
     private SkillDialog skillDialog;
-
+    private MazeEnv mazeEnv;
     /**
      * Khởi tạo giao diện chính của trò chơi mê cung
      * @param mazeSize Kích thước mê cung
      */
+
+    public GameForm(MazeEnv env) {
+        // Gọi constructor cũ để dựng UI
+        this(env.getMazeSize());
+
+        // Ghi đè mazeEnv và mazePanel
+        this.mazeEnv = env;
+        // Nếu MazePanel lưu mazeEnv cũ, cập nhật lại
+        this.mazePanel.setMazeEnv(env);
+        // Vẽ lại hiện trạng mê cung và tác tử
+        repaint();
+    }
+
     public GameForm(int mazeSize) {
         // Khởi tạo JFrame
         super();
@@ -32,6 +46,8 @@ public class GameForm extends JFrame {
         setUndecorated(true); // Bỏ bỏ thanh tiêu đề
         setResizable(false); // Không cho phép thay đổi kích thước cửa sổ
 
+        //thêm âm thanh
+        AudioPlayer.playSingleSound(AudioPlayer.BACKGROUND_MUSIC_PATH_GAMEFROM);
         // Tạo một JPanel với hình nền
         try {
             ImageIcon bgIcon = new ImageIcon(getClass().getResource(BACKGROUND_IMAGE_PATH));
@@ -49,7 +65,7 @@ public class GameForm extends JFrame {
         }
 
         // Khởi tạo MazePanel và InfoPanel, sau đó đưa vào JPanel chung
-        MazeEnv mazeEnv = new MazeEnv(mazeSize, 15, 60, Buff.SLIME_STEP, Buff.TOU_NO_HIKARI_OBS);
+        this.mazeEnv = new MazeEnv(mazeSize, 15, 60, Buff.SLIME_STEP, Buff.TOU_NO_HIKARI_OBS);
         mazePanel = new MazePanel(mazeSize, mazeEnv, this);
         
         InfoPanel infoPanel = new InfoPanel();
@@ -85,6 +101,13 @@ public class GameForm extends JFrame {
                     }, 300);
                     break;
                 case 2: // Trang chủ
+                        // 1) Lưu game
+                    try {
+                        mazeEnv.saveEnv("saved_env.dat");
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
                     new ShadowOverlay(this, 300, 0, ShadowOverlay.MIST_FALL);
                     new ShadowOverlay(new MainForm(), 500, 1000, ShadowOverlay.MIST_RISE);
                     new Timer().schedule(new java.util.TimerTask() {

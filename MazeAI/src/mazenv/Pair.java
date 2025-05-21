@@ -1,6 +1,8 @@
 package mazenv;
 
-public class Pair<T1, T2> {
+import java.io.Serializable;
+
+public class Pair<T1, T2> implements Serializable{
     private T1 item1;
     private T2 item2;
 
