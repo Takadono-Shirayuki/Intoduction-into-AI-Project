@@ -1,6 +1,10 @@
 package mazeinterface.mazedialog;
 
+import mazeinterface.mazecontrol.CharacterImage;
 import mazeinterface.mazecontrol.ColorShiftButton;
+import mazeinterface.mazecontrol.TypingTextArea;
+import mazeobject.Command;
+
 import javax.swing.*;
 
 import japy.JaPySolveMaze;
@@ -10,15 +14,30 @@ import java.awt.event.*;
 import java.io.*;
 import java.nio.file.*;
 import java.util.List;
+import java.util.Timer;
 import java.util.ArrayList;
 
-
 public class ChooseCompanionDialog extends JDialog {
-    private File[] scriptFiles;
-    private int selectedIndex = -1;
-    private JButton[] levelButtons;
-    private boolean exitOnClose = true;
+    private class Dialogue extends Command.Dialogue {
+        public Dialogue(String character, String displayName, String content) {
+            super(character, displayName, content);
+        }
 
+        public void run() {
+            typingTextArea.load(this, 20);
+            characterImage.load(this.character, this.avatar);
+            characterImage.highlight();
+        }
+    }
+
+    private int selectedIndex = -1;
+    private JButton[] conpanionButtons;
+    private boolean exitOnClose = true;
+    private List<Dialogue> dialogues = new ArrayList<>();
+    private CharacterImage characterImage = new CharacterImage(); // Hiển thị ảnh nhân vật
+    
+    private TypingTextArea typingTextArea; // Khu vực hiển thị lời thoại
+    
     public ChooseCompanionDialog(JFrame parent) {
         super(parent, true);
         setUndecorated(true);
@@ -38,38 +57,28 @@ public class ChooseCompanionDialog extends JDialog {
         setContentPane(contentPanel);
 
         // Load level folders
-        File scriptDir = Paths.get(System.getProperty("user.dir"), "scripts").toFile();
-        File[] subDirs = scriptDir.listFiles(File::isDirectory);
-        if (subDirs == null || subDirs.length == 0) {
+        File[] scriptDirectory = Paths.get(System.getProperty("user.dir"), "scripts").toFile().listFiles(File::isDirectory);
+        if (scriptDirectory == null || scriptDirectory.length == 0) {
             System.err.println("Không tìm thấy thư mục script.");
             return;
         }
 
-        List<File> validScripts = new ArrayList<>();
-        List<String> levelNames = new ArrayList<>();
+        List<String> companionName = new ArrayList<>();
 
-        for (File dir : subDirs) {
+        for (File dir : scriptDirectory) {
             File[] pyFiles = dir.listFiles((d, name) -> name.endsWith(".py"));
             if (pyFiles != null && pyFiles.length == 1) {
-                validScripts.add(pyFiles[0]);
-                levelNames.add(dir.getName());
+                companionName.add(dir.getName());
             }
         }
-
-        if (validScripts.isEmpty()) {
-            System.err.println("Không tìm thấy tệp .py hợp lệ trong các thư mục script.");
-            return;
-        }
-
-        scriptFiles = validScripts.toArray(new File[0]);
-        levelButtons = new JButton[scriptFiles.length];
+        conpanionButtons = new JButton[companionName.size()];
 
         Font btnFont = new Font("SansSerif", Font.BOLD, 20);
         Color btnStart = new Color(30, 30, 30);
         Color btnEnd = new Color(70, 70, 70);
         Dimension btnSize = new Dimension(300, 45);
 
-        int total = scriptFiles.length;
+        int total = companionName.size();
         int centerPanelWidth = 800;
         int centerPanelHeight = total * 60 + 130;
         JPanel centerPanel = new JPanel(null);
@@ -89,22 +98,59 @@ public class ChooseCompanionDialog extends JDialog {
         centerPanel.add(titleLabel);
 
         for (int i = 0; i < total; i++) {
-            ColorShiftButton levelBtn = new ColorShiftButton(
-                levelNames.get(i),
+            ColorShiftButton companionButton = new ColorShiftButton(
+                companionName.get(i),
                 btnFont,
                 Color.WHITE,
                 btnStart,
                 btnEnd,
                 btnSize
             );
-            int idx = i;
-            levelBtn.addActionListener(e -> {
-                selectedIndex = idx;
+            int scriptIndex = i;
+            companionButton.addActionListener(e -> {
+                dialogues.clear();
+                try (BufferedReader reader = new BufferedReader(new FileReader(scriptDirectory[scriptIndex].getAbsolutePath() + "/info.txt"))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.split("\\|");
+                        if (parts.length == 3) {
+                            String character = parts[0];
+                            String displayName = parts[1];
+                            String content = parts[2];
+                            dialogues.add(new Dialogue(character, displayName, content));
+                        }
+                    }   
+                } catch (Exception ex) {
+                    System.err.println("Không thể đọc tài liệu");
+                }
+
+                new Timer().schedule(
+                    new java.util.TimerTask() {
+                        int commandIndex = 0;
+                        @Override
+                        public void run() {
+                            if (!typingTextArea.isTyping())
+                            {
+                                if (commandIndex == dialogues.size()) {
+                                    characterImage.dimmed();
+                                    cancel();
+                                } else {
+                                    Dialogue dialogue = dialogues.get(commandIndex);
+                                    commandIndex++;
+                                    typingTextArea.load(dialogue, 50);
+                                    characterImage.load(dialogue.character, dialogue.avatar);
+                                    characterImage.highlight();
+                                }
+                            }
+                        }
+                    }, 0, 50
+                );
+                selectedIndex = scriptIndex;
                 updateButtonStyles();
             });
-            levelBtn.setBounds((centerPanelWidth - btnSize.width) / 2, 60 + i * 55, btnSize.width, btnSize.height);
-            levelButtons[i] = levelBtn;
-            centerPanel.add(levelBtn);
+            companionButton.setBounds((centerPanelWidth - btnSize.width) / 2, 60 + i * 60, btnSize.width, btnSize.height);
+            conpanionButtons[i] = companionButton;
+            centerPanel.add(companionButton);
         }
 
         ColorShiftButton runButton = new ColorShiftButton("▶ Bắt đầu hành trình",
@@ -114,9 +160,9 @@ public class ChooseCompanionDialog extends JDialog {
                 new Color(180, 80, 250),
                 new Dimension(250, 45));
 
-        runButton.setBounds((centerPanelWidth - 250) / 2, 60 + total * 55 + 10, 250, 45);
+        runButton.setBounds((centerPanelWidth - 250) / 2, 70 + total * 60, 250, 45);
         runButton.addActionListener(e -> {
-            JaPySolveMaze.Initialize(scriptFiles[selectedIndex].getAbsolutePath());
+            JaPySolveMaze.Initialize(scriptDirectory[selectedIndex].getAbsolutePath() + "/run.py");
             exitOnClose = false;
             dispose();
         });
@@ -125,12 +171,23 @@ public class ChooseCompanionDialog extends JDialog {
         selectedIndex = 0;
         updateButtonStyles();
 
+        // Tạo panel chứa lời thoại
+        typingTextArea = new TypingTextArea();
+        typingTextArea.setBounds(50, getHeight() - 170, getWidth() - 100, 150); // Set kích thước
+        getContentPane().add(typingTextArea);
+
+        // Gán ảnh nhân vật bên trái
+        characterImage = new CharacterImage();
+        characterImage.setBounds(50, 100, 400, 600);
+        getContentPane().add(characterImage);
+
         contentPanel.add(centerPanel);
+        setVisible(true);
     }
 
     private void updateButtonStyles() {
-        for (int i = 0; i < levelButtons.length; i++) {
-            JButton btn = levelButtons[i];
+        for (int i = 0; i < conpanionButtons.length; i++) {
+            JButton btn = conpanionButtons[i];
             if (i == selectedIndex) {
                 btn.setForeground(Color.YELLOW);
             } else {
