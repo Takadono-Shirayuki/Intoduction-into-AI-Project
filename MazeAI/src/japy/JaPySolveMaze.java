@@ -36,23 +36,40 @@ public class JaPySolveMaze {
 
 
     public int requestNextStep(int[][] discovered, int posX, int posY) {
-        jaPy.createPythonProcess();
-        String input = generateMazeInput(discovered, posX, posY);
-        Pair<String, Boolean> result = jaPy.runPythonScript(input);
-        
-        // process here
+    jaPy.createPythonProcess();
+    String input = generateMazeInput(discovered, posX, posY);
+    Pair<String, Boolean> result = jaPy.runPythonScript(input);
 
-        return 1;
+    if (!result.getItem2() || result.getItem1() == null) {
+        System.err.println("Lỗi khi nhận action từ Python.");
+        return -1;
     }
+
+    try {
+        return Integer.parseInt(result.getItem1().trim());
+    } catch (NumberFormatException e) {
+        System.err.println("Không thể chuyển kết quả thành số nguyên: " + result.getItem1());
+        return -1;
+    }
+}
 
     public int requestNextSkill(int[][] discovered, int posX, int posY, int[] skillIds) {
         jaPy.createPythonProcess();
         String input = generateMazeAndSkillsInput(discovered, posX, posY, skillIds);
         Pair<String, Boolean> result = jaPy.runPythonScript(input);
-        
-        // process here
 
-        return 1;
+        if (!result.getItem2() || result.getItem1() == null) {
+            System.err.println("Lỗi khi nhận skill từ Python.");
+            return -1;
+        }
+
+        try {
+            return Integer.parseInt(result.getItem1().trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Không thể chuyển kết quả thành số nguyên: " + result.getItem1());
+            return -1;
+        }
     }
+
     
 }

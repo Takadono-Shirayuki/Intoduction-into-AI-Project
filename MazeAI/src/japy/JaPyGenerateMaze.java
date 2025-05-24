@@ -32,8 +32,11 @@ public class JaPyGenerateMaze {
         sb.append(goalX).append(" ").append(goalY).append("\n");
         Pair<String, Boolean> result = jaPy.runPythonScript(sb.toString());
 
-        // process here
-        
-        return new Maze(null);
+        if (result.getItem2()) {
+            return new Maze(result.getItem1());  // Chuyển chuỗi trả về thành Maze
+        } else {
+            System.err.println("Không tạo được maze mới từ Python");
+            return null;
+        }
     }
 }
