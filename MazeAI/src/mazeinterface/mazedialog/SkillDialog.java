@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
+
+import game.GameVariable;
 import mazeinterface.mazecontrol.ImageButton;
 import mazeinterface.mazecontrol.SkillCard;
 import mazenv.MazeEnv.Buff;
@@ -59,9 +61,11 @@ public class SkillDialog extends JDialog {
         JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         selectionPanel.setOpaque(false);
 
-        JButton selectButton = new ImageButton("/mazeai/Icon/SpookyButton.jpg", "Chọn",
+        JButton selectButton = new ImageButton(GameVariable.SPOOKY_IMAGE_PATH, "Chọn",
                 new Font("Arial", Font.BOLD, 20), Color.WHITE, new Dimension(150, 60));
-        JButton skipButton = new ImageButton("/mazeai/Icon/SpookyButton.jpg", "Bỏ qua",
+        JButton skipButton = new ImageButton(GameVariable.SPOOKY_IMAGE_PATH, "Bỏ qua",
+                new Font("Arial", Font.BOLD, 20), Color.WHITE, new Dimension(150, 60));
+        JButton supportButton = new ImageButton(GameVariable.SPOOKY_IMAGE_PATH, "Hỗ trợ",
                 new Font("Arial", Font.BOLD, 20), Color.WHITE, new Dimension(150, 60));
 
         selectButton.addActionListener(e -> {
@@ -69,9 +73,13 @@ public class SkillDialog extends JDialog {
             setVisible(false);
         });
         skipButton.addActionListener(e -> setVisible(false));
-
+        supportButton.addActionListener(e -> {
+            
+        });
+        
         selectionPanel.add(selectButton);
         selectionPanel.add(skipButton);
+        selectionPanel.add(supportButton);
 
         gbc.gridy = 1;
         mainPanel.add(selectionPanel, gbc);

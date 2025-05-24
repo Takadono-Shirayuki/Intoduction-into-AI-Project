@@ -3,7 +3,10 @@ package mazeinterface.mazedialog; // Khai báo package chứa lớp MazeIntro
 import javax.swing.*; // Thư viện Swing cho giao diện người dùng
 
 import game.GameVariable;
+import mazeinterface.mazecontrol.CharacterImage;
 import mazeinterface.mazecontrol.ImageButton;
+import mazeinterface.mazecontrol.TypingTextArea;
+import mazeobject.Command;
 
 import java.awt.*; // Thư viện đồ họa
 import java.awt.event.*; // Xử lý sự kiện
@@ -15,56 +18,28 @@ import java.util.List;
 // 
 public class ConversationDialog extends JDialog {
     /**
-     * Lớp này dùng để đọc lệnh từ file script <p>
-     * Các lệnh bao gồm: <p>
-     * - Dialogue: Lời thoại của nhân vật <p>
-     * - Input: Nhập liệu từ người dùng <p>
-     * - Select: Lựa chọn từ người dùng <p>
-     * - Jump: Nhảy đến câu thoại khác <p>
-     * Các lệnh này được lưu trong file script và được đọc vào khi khởi tạo <p>
-     * Các lệnh này được thực hiện theo thứ tự từ trên xuống dưới <p>
-     */
-    public abstract class Command
-    {
-        public String commandType;
-
-        public abstract void run(); // Phương thức chạy lệnh
-    }
-
-    /**
      * Lớp này dùng để lưu thông tin lời thoại <p>
      * Nó bao gồm tên nhân vật, tên hiển thị và nội dung lời thoại <p>
      * Nó cũng bao gồm ảnh đại diện của nhân vật <p>
      * Nó được sử dụng để hiển thị lời thoại trong ContentTextArea <p>
      */
-    private class Dialogue extends Command
+    private class Dialogue extends Command.Dialogue
     {
-        // Đường dẫn tài nguyên
-        private static final String IMAGE_PATH = "/mazeai/MazeImage/";
-
-        public String character;
-        public String displayName;
-        public String content;
-        public ImageIcon avatar;
-        public Dialogue(String charecter, String displayName, String content) {
-            this.commandType = "Dialogue"; // Loại lệnh
-            this.character = charecter;
-            this.displayName = displayName;
-            this.content = content;
-            this.avatar = new ImageIcon(getClass().getResource(IMAGE_PATH + GameVariable.format(charecter) + ".png"));
+        public Dialogue(String character, String displayName, String content) {
+            super(character, displayName, content);
         }
 
         public void run() {
-            contentTextArea.load(this); // Tải nội dung lời thoại
+            typingTextArea.load(this, 30); // Tải nội dung lời thoại
             commandIndex++; // Tăng chỉ số câu thoại
 
             // Kiểm tra nếu kkhông cùng 1 người nói
-            if (!characterImages[charecterImageIndex].character.equals(this.character)) {
+            if (!characterImages[characterImageIndex].character.equals(this.character)) {
                 // Nếu không cùng người nói thì làm mờ người trước đó
-                characterImages[charecterImageIndex].dimmed();
-                charecterImageIndex = 1 - charecterImageIndex; // Đổi chỉ số nhân vật
-                characterImages[charecterImageIndex].load(this.character, this.avatar); // Tải ảnh nhân vật mới
-                characterImages[charecterImageIndex].highlight(); // Làm sáng người nói
+                characterImages[characterImageIndex].dimmed();
+                characterImageIndex = 1 - characterImageIndex; // Đổi chỉ số nhân vật
+                characterImages[characterImageIndex].load(this.character, this.avatar); // Tải ảnh nhân vật mới
+                characterImages[characterImageIndex].highlight(); // Làm sáng người nói
             }
         }
     }
@@ -74,15 +49,10 @@ public class ConversationDialog extends JDialog {
      * Nó bao gồm văn bản hiển thị và tên biến <p>
      * Dùng để thay đổi giá trị của biến trong game <p>
      */
-    private class Input extends Command
-    {
-        public String displayText;
-        public String variableName;
-        
+    private class Input extends Command.Input
+    {   
         public Input(String displayText, String variableName) {
-            this.commandType = "Input"; // Loại lệnh
-            this.displayText = displayText; // Văn bản hiển thị
-            this.variableName = variableName; // Tên biến cần thay đổi
+            super(displayText, variableName);
         }
         
         public void run() {
@@ -100,35 +70,10 @@ public class ConversationDialog extends JDialog {
      * Lớp này dùng để lưu thông tin lựa chọn <p>
      * Có thể thực hiện một lệnh lựa chọn và thay đổi gía trị một biến của game <p>
      */
-    private class Select extends Command
+    private class Select extends Command.Select
     {
-        /**
-         * Lớp này dùng để lưu thông tin tùy chọn <p>
-         * Nó bao gồm văn bản hiển thị, tên biến, giá trị biến và chỉ số lệnh tiếp theo <p>
-         */
-        public static class Option
-        {
-            public final String separator = ">>"; // Dấu phân cách
-            public String displayText;
-            public int nextCommandIndex;
-            public String variableName;
-            public String variableValue;
-            public Option(String option){
-                String[] parts = option.split(separator); // Tách chuỗi theo dấu phân cách
-                this.displayText = parts[0]; // Văn bản hiển thị
-                this.nextCommandIndex = Integer.parseInt(parts[1]); // Chỉ số lệnh tiếp theo
-                this.variableName = parts[2]; // Tên biến
-                this.variableValue = parts[3]; // Giá trị biến
-            }
-        }
-
-        public String displayText;
-        public Option[] options;
-
         public Select(String displayText, Option[] options) {
-            this.commandType = "Select"; // Loại lệnh
-            this.displayText = displayText; // Văn bản hiển thị
-            this.options = options; // Danh sách tùy chọn
+            super(displayText, options); // Gọi constructor của lớp cha
         }
 
         public void run() {
@@ -156,12 +101,10 @@ public class ConversationDialog extends JDialog {
      * Lớp này dùng để nhảy đến câu thoại khác <p>
      * Nó bao gồm chỉ số lệnh tiếp theo <p>
      */
-    private class Jump extends Command
+    private class Jump extends Command.Jump
     {
-        public int nextCommandIndex;
         public Jump(int nextCommandIndex) {
-            this.commandType = "Jump"; // Loại lệnh
-            this.nextCommandIndex = nextCommandIndex; // Chỉ số lệnh tiếp theo
+            super(nextCommandIndex); // Gọi constructor của lớp cha
         }
 
         public void run() {
@@ -170,133 +113,12 @@ public class ConversationDialog extends JDialog {
         }
     }
 
-    /**
-     * Lớp này dùng để hiển thị nội dung lời thoại <p>
-     */
-    private class ContentTextArea extends JPanel {
-        private JLabel displayNameLabel; // Nhãn hiển thị tên người nói
-        private JTextArea contentTextArea; // Khu vực hiển thị nội dung lời thoại
-        private java.util.Timer typingTimer; // Bộ đếm thời gian cho hiệu ứng gõ chữ
-
-        private String content = ""; // Nội dung lời thoại
-        public ContentTextArea() {
-            setLayout(null);
-            setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            setBackground(new Color(0, 0, 0, 0)); // Màu nền trong suốt
-
-            // Nhãn hiển thị tên người nói
-            displayNameLabel = new JLabel("");
-            displayNameLabel.setFont(new Font("Serif", Font.BOLD, 28));
-            displayNameLabel.setHorizontalAlignment(SwingConstants.LEFT);
-            displayNameLabel.setForeground(Color.YELLOW);
-            add(displayNameLabel);
-
-            // Khu vực hiển thị lời thoại
-            contentTextArea = new JTextArea();
-            contentTextArea.setLineWrap(true);
-            contentTextArea.setWrapStyleWord(true);
-            contentTextArea.setFont(new Font("Serif", Font.PLAIN, 26));
-            contentTextArea.setForeground(Color.WHITE);
-            contentTextArea.setEditable(false);
-            contentTextArea.setBackground(Color.DARK_GRAY);
-            contentTextArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            add(contentTextArea);
-        }
-
-        /**
-         * Phương thức này dùng để tải dữ liệu mới cho lời thoại <p>
-         * @param dialogue Đối tượng Dialogue chứa thông tin lời thoại
-         */
-        public void load(Dialogue dialogue) {
-            displayNameLabel.setText(GameVariable.format(dialogue.displayName)); // Hiển thị tên người nói
-            contentTextArea.setText(""); // Xóa nội dung cũ
-            
-            content = GameVariable.format(dialogue.content); // Lưu nội dung lời thoại
-
-            // Tạo hiệu ứng gõ chữ
-            typingTimer = new java.util.Timer();
-            typingTimer.schedule(new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    if (contentTextArea.getText().length() < dialogue.content.length()) {
-                        contentTextArea.append(String.valueOf(dialogue.content.charAt(contentTextArea.getText().length()))); // Thêm ký tự vào nội dung
-                    } else {
-                        cancel(); // Dừng lại khi đã hết nội dung
-                    }
-                }
-            }, 0, 20); // Thời gian giữa các ký tự
-        }
-
-        /**
-         * Bỏ qua hiệu ứng gõ chữ <p>
-         */
-        public void skipTyping() {
-            if (typingTimer != null) {
-                typingTimer.cancel(); // Dừng bộ đếm thời gian
-            }
-            contentTextArea.setText(content); // Bỏ qua hiệu ứng gõ chữ
-        }
-
-        /**
-         * Kiểm tra xem còn ký tự nào chưa gõ không <p>
-         * @return true nếu còn ký tự chưa gõ, false nếu đã gõ hết
-         */
-        public boolean isTyping() {
-            return contentTextArea.getText().length() < content.length(); // Kiểm tra xem còn ký tự nào chưa gõ không
-        }
-
-        @Override
-        public void setBounds(int x, int y, int width, int height) {
-            super.setBounds(x, y, width, height);
-            displayNameLabel.setBounds(30, 10, width - 20, 40);
-            contentTextArea.setBounds(10, 50, width - 20, height - 60);
-        }
-    }
-
-    /**
-     * Lớp này dùng để hiển thị ảnh nhân vật <p>
-     * Có phương thức để làm sáng và làm mờ ảnh <p>
-     */
-    private class CharecterImage extends JLabel
-    {
-        public String character = "";
-        private ImageIcon avatar;
-        private ImageIcon dimmedAvatar;
-        public CharecterImage() {
-            super(); // Hiển thị ảnh nhân vật
-        }
-
-        /** 
-         * Làm sáng ảnh nhân vật <p>
-         */
-        public void highlight() {
-            setIcon(avatar); // Hiển thị ảnh nhân vật
-        }
-
-        /**
-         * Làm mờ ảnh nhân vật <p>
-         */
-        public void dimmed() {
-            setIcon(dimmedAvatar); // Hiển thị ảnh nhân vật mờ
-        }
-
-        /**
-         * Tải dữ liệu mới cho nhân vật <p>
-         * @param character Tên người nói
-         * @param avatar Ảnh nhân vật
-         */
-        public void load(String character, ImageIcon avatar) {
-            this.character = character; // Gán tên người nói
-            this.avatar = avatar; // Gán ảnh nhân vật
-            this.dimmedAvatar = new ImageIcon(GrayFilter.createDisabledImage(avatar.getImage())); // Tạo ảnh mờ
-        }
-    }
     private JFrame parent; // Cửa sổ cha
 
-    private CharecterImage characterImages[] = new CharecterImage[2]; // Mảng chứa ảnh nhân vật
-    private int charecterImageIndex = 1; // Chỉ số nhân vật hiện tại
+    private CharacterImage characterImages[] = new CharacterImage[2]; // Mảng chứa ảnh nhân vật
+    private int characterImageIndex = 1; // Chỉ số nhân vật hiện tại
     
-    private ContentTextArea contentTextArea; // Khu vực hiển thị lời thoại
+    private TypingTextArea typingTextArea; // Khu vực hiển thị lời thoại
 
     private List<Command> commands = new ArrayList<>(); // Danh sách các lệnh
     private int commandIndex = 0; // Câu thoại hiện tại
@@ -320,22 +142,22 @@ public class ConversationDialog extends JDialog {
         loadDialogues(dialogFilePath); // Tải lời thoại từ file
 
         // Gán ảnh nhân vật bên trái
-        characterImages[0] = new CharecterImage();
+        characterImages[0] = new CharacterImage();
         characterImages[0].setBounds(50, 100, 400, 600);
         getContentPane().add(characterImages[0]);
 
         // Gán ảnh nhân vật bên phải
-        characterImages[1] = new CharecterImage();
+        characterImages[1] = new CharacterImage();
         characterImages[1].setBounds(getWidth() - 450, 100, 400, 600); // Set kích thước
         getContentPane().add(characterImages[1]);
 
         // Tạo panel chứa lời thoại
-        contentTextArea = new ContentTextArea();
-        contentTextArea.setBounds(50, getHeight() - 170, getWidth() - 100, 150); // Set kích thước
-        getContentPane().add(contentTextArea);
+        typingTextArea = new TypingTextArea();
+        typingTextArea.setBounds(50, getHeight() - 170, getWidth() - 100, 150); // Set kích thước
+        getContentPane().add(typingTextArea);
 
         // Nút bỏ qua đoạn giới thiệu
-        JButton skipButton = new ImageButton("/mazeai/Icon/SpookyButton.jpg", "Bỏ qua", new Font("Serif", Font.BOLD, 20), Color.WHITE, new Dimension(100, 40));
+        JButton skipButton = new ImageButton(GameVariable.SPOOKY_IMAGE_PATH, "Bỏ qua", new Font("Serif", Font.BOLD, 20), Color.WHITE, new Dimension(100, 40));
         skipButton.setBounds(getWidth() - 120, 20, 100, 40);
         skipButton.addActionListener(e -> skip());
         getContentPane().add(skipButton);
@@ -410,8 +232,8 @@ public class ConversationDialog extends JDialog {
      * Nếu không còn câu thoại nào thì đóng cửa sổ
      */
     private void processNextCommand() {
-        if (contentTextArea.isTyping()) {
-            contentTextArea.skipTyping(); // Bỏ qua hiệu ứng gõ chữ
+        if (typingTextArea.isTyping()) {
+            typingTextArea.skipTyping(); // Bỏ qua hiệu ứng gõ chữ
         }
         else 
         {

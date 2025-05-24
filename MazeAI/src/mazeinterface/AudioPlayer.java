@@ -8,7 +8,6 @@ public class AudioPlayer {
     private static Clip clip;
     private static boolean looping = false;
     private static List<String> currentPlaylist;
-    private static int currentIndex = 0;
     private static Thread loopThread;
     static final String BACKGROUND_MUSIC_PATH_GAMEFROM = "/mazeai/MazeSound/MazeSound.wav";  // Đường dẫn nhạc nền
     static final String BACKGROUND_MUSIC_PATH_MAINFROM = "/mazeai/MazeSound/MazeSoundMainForm.wav"; 
@@ -44,7 +43,6 @@ public class AudioPlayer {
 
         looping = loop;
         currentPlaylist = playlist;
-        currentIndex = 0;
 
         loopThread = new Thread(() -> {
             try {

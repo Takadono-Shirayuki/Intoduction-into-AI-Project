@@ -19,11 +19,12 @@ import mazenv.MazeEnv.Buff;
 import mazenv.Pair;
 
 public class SkillCard extends JPanel {
-    private static final String SENRIGAN_ICON = "Icon/Senrigan.jpg";
-    private static final String SLIME_SAN_ONEGAI_ICON = "Icon/SlimeSanOnegai.jpg";
-    private static final String TOU_NO_HIKARI_ICON = "Icon/TouNoHikari.jpg";
-    private static final String UNMEI_NO_MICHI_ICON = "Icon/UnmeiNoMichi.jpg";
+    private static final String SENRIGAN_ICON = "/mazeai/Icon/Senrigan.jpg";
+    private static final String SLIME_SAN_ONEGAI_ICON = "/mazeai/Icon/SlimeSanOnegai.jpg";
+    private static final String TOU_NO_HIKARI_ICON = "/mazeai/Icon/TouNoHikari.jpg";
+    private static final String UNMEI_NO_MICHI_ICON = "/mazeai/Icon/UnmeiNoMichi.jpg";
 
+    private static final String SKILL_CARD_BACKGROUND = "/mazeai/Icon/SkillCard.jpg"; // Đường dẫn đến ảnh nền của SkillCard
     private int skillBuff; // Biến để lưu kỹ năng đã chọn
     private SkillDialog parent;
     /**
@@ -33,7 +34,7 @@ public class SkillCard extends JPanel {
      */
     public SkillCard(SkillDialog parent, int skillBuff) {
         super(new BorderLayout());
-        backgroundImage = new ImageIcon(getClass().getResource("/mazeai/Icon/SkillCard.jpg")).getImage(); // Tải ảnh nền
+        backgroundImage = new ImageIcon(getClass().getResource(SKILL_CARD_BACKGROUND)).getImage(); // Tải ảnh nền
         if (backgroundImage == null) {
             System.err.println("Không thể tải ảnh nền cho SkillCard");
         }
@@ -161,7 +162,7 @@ public class SkillCard extends JPanel {
      */
     private ImageIcon createRoundedIcon(String path, int size) {
         try {
-            BufferedImage original = javax.imageio.ImageIO.read(getClass().getResourceAsStream("/mazeai/" + path));
+            BufferedImage original = javax.imageio.ImageIO.read(getClass().getResourceAsStream(path));
             Image scaled = original.getScaledInstance(size, size, Image.SCALE_SMOOTH);
 
             BufferedImage rounded = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
