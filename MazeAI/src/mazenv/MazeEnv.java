@@ -171,7 +171,7 @@ public class MazeEnv implements Serializable{
             return new Pair<>(skillName, skillDescription);
         }
     }
-
+    private int sessionStepCount = 0;
     private Maze maze;
     private DiscoveredMaze discoveredMaze;
     private boolean senriganBuff = false;
@@ -188,7 +188,6 @@ public class MazeEnv implements Serializable{
     private int baseSlimeStep;
     private int baseTouNoHikariObs;
     private boolean hellMode = false;
-
     public MazeEnv(int mazeSize, int maxStep, int pathPercent, int slimeStep, int touNoHikariObs) {
         this(mazeSize, maxStep, pathPercent, slimeStep, touNoHikariObs, false);
     }
@@ -330,6 +329,7 @@ public class MazeEnv implements Serializable{
         if (takeAction) {
             numberOfUsedSteps++;
             stepRemaining --;
+            sessionStepCount++;
         }
         Point agentPos = maze.getAgentPosition();
         int[][] mazeData = maze.getDiscoverData(senriganBuff ? 5 : 3);
@@ -453,5 +453,7 @@ public class MazeEnv implements Serializable{
     public int getMazeSize() {
         return this.maze.getMazeSize();
     }
-
+    public int getSessionStepCount() {
+    return sessionStepCount;
+}
 }

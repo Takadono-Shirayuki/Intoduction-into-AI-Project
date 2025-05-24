@@ -9,113 +9,101 @@ import mazenv.MazeEnv;
 import java.awt.*;
 
 public class MainForm extends JFrame {
-    private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/MainBackground.jpg";  // Đường dẫn đến ảnh nền
-    
+    private static final String BACKGROUND_IMAGE_PATH = "/mazeai/MazeImage/MainBackground.jpg";
+
     public MainForm() {
-        // Khởi tạo cửa sổ JFrame cho menu với tiêu đề và các cấu hình cơ bản
-        setUndecorated(true);  // Ẩn thanh tiêu đề của cửa sổ
-        setDefaultCloseOperation(EXIT_ON_CLOSE);  // Khi đóng cửa sổ, ứng dụng sẽ thoát
-        setExtendedState(JFrame.MAXIMIZED_BOTH);  // Mở rộng cửa sổ ra toàn màn hình
-        setResizable(false);  // Cấm thay đổi kích thước cửa sổ
-        //thêm âm thanh
+        // Thiết lập JFrame
+        setUndecorated(true);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(false);
+
+        // Phát nhạc nền menu
         AudioPlayer.playSingleSound(AudioPlayer.BACKGROUND_MUSIC_PATH_MAINFROM);
 
-        JPanel backgroundPanel = new JPanel();  // Tạo một JPanel để chứa các thành phần giao diện
-        // Tạo một JPanel với hình nền
+        // Background panel
+        JPanel backgroundPanel = new JPanel();
         try {
             ImageIcon bgIcon = new ImageIcon(getClass().getResource(BACKGROUND_IMAGE_PATH));
             Image bgImage = bgIcon.getImage();
-            backgroundPanel = new JPanel() {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);  // Gọi phương thức paintComponent của JPanel gốc
-                    g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);  // Vẽ hình nền lên JPanel
+            backgroundPanel = new JPanel(){
+                @Override protected void paintComponent(Graphics g){
+                    super.paintComponent(g);
+                    g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
                 }
             };
-            setContentPane(backgroundPanel);  // Đặt JPanel làm nội dung chính của cửa sổ JFrame
-            getContentPane().setLayout(null);  // Đặt layout của JFrame là null để tự do định vị các thành phần
-        } catch (Exception e) {
+            setContentPane(backgroundPanel);
+            getContentPane().setLayout(null);
+        } catch(Exception e){
             System.err.println("Không thể tải background");
-        }        
+        }
 
-        // Cấu hình font và màu sắc cho các nút
-        Font btnFont = new Font("SansSerif", Font.BOLD, 24);  // Tạo font cho các nút với kiểu chữ SansSerif, in đậm, cỡ 24
-        Color btnStart = new Color(255, 105, 180);  // Màu bắt đầu của gradient (hồng sáng)
-        Color btnEnd = new Color(128, 0, 128);  // Màu kết thúc của gradient (tím đậm)
+        // Font và màu gradient cho nút
+        Font btnFont = new Font("SansSerif", Font.BOLD, 24);
+        Color btnStart = new Color(255, 105, 180);
+        Color btnEnd   = new Color(128, 0, 128);
 
-        // Vị trí và kích thước của các nút
-        int x = 620;  // Vị trí X của các nút
-        int yStart = 300;  // Vị trí Y bắt đầu của nút đầu tiên
-        Dimension btnSize = new Dimension(300, 50);  // Kích thước của các nút
-        int spacing = 70;  // Khoảng cách giữa các nút
+        // Tọa độ và kích thước nút
+        int x = 620, y0 = 300, spacing = 70;
+        Dimension sz = new Dimension(300, 50);
 
-        // Thêm các nút vào backgroundPanel
-        ColorShiftButton startButton = new ColorShiftButton("Chơi", btnFont, Color.WHITE, btnStart, btnEnd, btnSize);  // Tạo nút "Chơi" với màu sắc và kích thước đã định nghĩa
-        ColorShiftButton continueButton = new ColorShiftButton("Chơi tiếp", btnFont, Color.WHITE, btnStart, btnEnd, btnSize);  // Tạo nút "Chơi tiếp" với màu sắc và kích thước đã định nghĩa
-        ColorShiftButton hellModeButton = new ColorShiftButton("Chế độ địa ngục", btnFont, Color.WHITE, btnStart, btnEnd, btnSize);  // Tạo nút "Chế độ địa ngục" với màu sắc và kích thước đã định nghĩa
-        ColorShiftButton instructionButton = new ColorShiftButton("Hướng dẫn", btnFont, Color.WHITE, btnStart, btnEnd, btnSize);  // Tạo nút "Hướng dẫn" với màu sắc và kích thước đã định nghĩa
-        ColorShiftButton exitButton = new ColorShiftButton("Thoát", btnFont, Color.WHITE, btnStart, btnEnd, btnSize);  // Tạo nút "Thoát" với màu sắc và kích thước đã định nghĩa
+        // Tạo và đặt vị trí các nút
+        ColorShiftButton play    = new ColorShiftButton("Chơi",      btnFont, Color.WHITE, btnStart, btnEnd, sz);
+        ColorShiftButton cont    = new ColorShiftButton("Chơi tiếp", btnFont, Color.WHITE, btnStart, btnEnd, sz);
+        ColorShiftButton hell    = new ColorShiftButton("Chế độ địa ngục", btnFont, Color.WHITE, btnStart, btnEnd, sz);
+        ColorShiftButton help    = new ColorShiftButton("Hướng dẫn", btnFont, Color.WHITE, btnStart, btnEnd, sz);
+        ColorShiftButton exit    = new ColorShiftButton("Thoát",      btnFont, Color.WHITE, btnStart, btnEnd, sz);
 
-        // Đặt vị trí cho các nút
-        startButton.setLocation(new Point(x, yStart + spacing * 0));  // Đặt vị trí cho nút "Chơi"
-        continueButton.setLocation(new Point(x, yStart + spacing * 1));  // Đặt vị trí cho nút "Chơi tiếp"
-        hellModeButton.setLocation(new Point(x, yStart + spacing * 2));  // Đặt vị trí cho nút "Chế độ địa ngục"
-        instructionButton.setLocation(new Point(x, yStart + spacing * 3));  // Đặt vị trí cho nút "Hướng dẫn"
-        exitButton.setLocation(new Point(x, yStart + spacing * 4));  // Đặt vị trí cho nút "Thoát"
+        play   .setLocation(x, y0 + spacing*0);
+        cont   .setLocation(x, y0 + spacing*1);
+        hell   .setLocation(x, y0 + spacing*2);
+        help   .setLocation(x, y0 + spacing*3);
+        exit   .setLocation(x, y0 + spacing*4);
 
-        // Đặt sự kiện cho các nút
-        startButton.addActionListener(e -> startGame(false));  // Khi nhấn nút "Chơi", gọi hàm startGame với tham số false
-        continueButton.addActionListener(e -> startGame(true));  // Khi nhấn nút "Chơi tiếp", gọi hàm startGame với tham số true
-        hellModeButton.addActionListener(e -> startHellMode());  // Khi nhấn nút "Chế độ địa ngục", gọi hàm startHellMode
-        instructionButton.addActionListener(e -> new InstructionWindow(this).setVisible(true));  // Khi nhấn nút "Hướng dẫn", mở cửa sổ hướng dẫn
-        exitButton.addActionListener(e -> System.exit(0));  // Khi nhấn nút "Thoát", thoát ứng dụng
-        
-        // Thêm các nút vào backgroundPanel
-        backgroundPanel.add(startButton);  // Thêm nút "Chơi" vào JPanel
-        backgroundPanel.add(continueButton);  // Thêm nút "Chơi tiếp" vào JPanel
-        backgroundPanel.add(hellModeButton);  // Thêm nút "Chế độ địa ngục" vào JPanel
-        backgroundPanel.add(instructionButton);  // Thêm nút "Hướng dẫn" vào JPanel
-        backgroundPanel.add(exitButton);  // Thêm nút "Thoát" vào JPanel
-        
-        // Hiển thị giao diện menu
+        // Sự kiện cho các nút
+        play.addActionListener(e -> startGame(false));
+        cont.addActionListener(e -> startGame(true));
+        hell.addActionListener(e -> startHellMode());
+        help.addActionListener(e -> new InstructionWindow(this).setVisible(true));
+        exit.addActionListener(e -> System.exit(0));
+
+        // Thêm vào panel
+        backgroundPanel.add(play);
+        backgroundPanel.add(cont);
+        backgroundPanel.add(hell);
+        backgroundPanel.add(help);
+        backgroundPanel.add(exit);
+
         setVisible(true);
     }
 
-    // Phương thức startGame để bắt đầu trò chơi mới hoặc tiếp tục trò chơi
-    private void startGame(boolean continueGame) {
-        // Tạo lớp phủ mờ dần khi bắt đầu trò chơi
-        new ShadowOverlay(this, 500, 0, ShadowOverlay.MIST_FALL);
+private void startGame(boolean continueGame) {
+    new ShadowOverlay(this, 500, 0, ShadowOverlay.MIST_FALL);
+    int mazeSize = 30;
 
-        int mazeSize = 30;  // Kích thước mê cung
-    
-        // Nếu tiếp tục trò chơi, lấy trạng thái đã lưu
-        if (continueGame) {
-            try {
-                MazeEnv restoredEnv = MazeEnv.loadEnv(GameVariable.SAVED_GAME_PATH);  // Tải trạng thái mê cung đã lưu
-                new ShadowOverlay(new GameForm(restoredEnv), 500, 0, ShadowOverlay.MIST_FALL);
-            } catch(Exception e) {
-                System.out.println("ko thể tải");
-                // fallback về game mới
-            }
-        } else {
-            // Game mới như cũ
+    if (continueGame) {
+        try {
+            MazeEnv env = MazeEnv.loadEnv(GameVariable.SAVED_GAME_PATH);
+            // Tạo GameForm với skipInitialDialog = true
+            new ShadowOverlay(new GameForm(env), 500, 1000, ShadowOverlay.MIST_RISE);
+        } catch (Exception ex) {
+            System.err.println("Không thể tải savegame, khởi mới");
             new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE);
         }
-        // Giải phóng tài nguyên sau khi mở cửa sổ trò chơi
-        new java.util.Timer().schedule(new java.util.TimerTask() {
-            @Override
-            public void run() {
-                dispose();  // Đóng cửa sổ menu
-                cancel();  // Hủy tác vụ sau khi mở cửa sổ trò chơi
-            }
-        }, 1500);  // Thời gian chờ trước khi đóng cửa sổ menu
-
-        // Đóng cửa sổ menu
-        setVisible(false);  // Ẩn cửa sổ menu
+    } else {
+        // Chơi mới
+        new ShadowOverlay(new GameForm(mazeSize), 500, 1000, ShadowOverlay.MIST_RISE);
     }
 
-    // Phương thức startHellMode để bắt đầu chế độ địa ngục với độ khó cao hơn
+    // Đóng menu sau hiệu ứng
+    new java.util.Timer().schedule(new java.util.TimerTask(){
+        @Override public void run(){ dispose(); cancel(); }
+    }, 1500);
+    setVisible(false);
+}
+
+
     private void startHellMode() {
-        // Có thể thêm logic để bắt đầu chế độ địa ngục
+        // TODO: implement hell mode
     }
 }

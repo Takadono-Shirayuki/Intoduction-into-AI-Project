@@ -202,4 +202,9 @@ protected void paintComponent(Graphics g) {
         this.mazeEnv = env;
     }
 
+    public void setStepCounter(int count) {
+        this.stepCounter = count;
+    }
+
 }
+
