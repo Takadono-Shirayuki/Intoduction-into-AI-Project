@@ -99,7 +99,7 @@ public class MazeEnv implements Serializable{
      * SHIN_NO_MEIRO: Tạo mê cung chết, không có đường đi đến đích. <p>
      * Các debuff này được sử dụng trong phương thức regenerateMaze() để kích hoạt debuff cho mê cung.
      */
-    public class Debuff{
+    public static class Debuff{
         /**
          * Không có debuff nào được kích hoạt.
          */

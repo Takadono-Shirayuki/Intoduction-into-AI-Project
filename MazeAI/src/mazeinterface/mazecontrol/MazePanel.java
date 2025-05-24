@@ -3,15 +3,17 @@ package mazeinterface.mazecontrol;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.List;
-import java.util.Random;
 import javax.swing.*;
-
-import game.Main;
 import mazeinterface.GameForm;
-import mazenv.*;
-import mazenv.MazeEnv.Debuff;
+import mazenv.Maze;
+import mazenv.MazeEnv;
+import mazenv.MazeState;
+import mazenv.Pair;
 
+
+/**
+ * Lớp quản lý giao diện hiển thị mê cung, xử lý bàn phím và tương tác.
+ */
 public class MazePanel extends JPanel {
     private int mazeSize;
     private float scale = 1.0f;
@@ -21,11 +23,13 @@ public class MazePanel extends JPanel {
     private int stepCounter = 0;
     private GameForm parent;
 
-    private Image playerIcon; // ảnh người chơi
+    private Image playerIcon;
+    private Image wallTile;
 
+    /**
+     * Khởi tạo MazePanel với mazeEnv và gameForm liên kết.
+     */
     public MazePanel(int mazeSize, MazeEnv mazeEnv, GameForm parent) {
-        Main.setMazePanel(this);
-        
         this.mazeSize = mazeSize;
         this.mazeEnv = mazeEnv;
         this.parent = parent;
@@ -39,7 +43,13 @@ public class MazePanel extends JPanel {
         try {
             playerIcon = new ImageIcon(getClass().getResource("/mazeai/Icon/Robot.jpg")).getImage();
         } catch (Exception e) {
-            System.err.println("Không thể tải ảnh Robot.jpg");
+            System.err.println("Không thể tải Robot.jpg");
+        }
+
+        try {
+            wallTile = new ImageIcon(getClass().getResource("/mazeai/Icon/wall.jpg")).getImage();
+        } catch (Exception e) {
+            System.err.println("Không thể tải wall.jpg");
         }
 
         addKeyListener(new KeyAdapter() {
@@ -50,6 +60,7 @@ public class MazePanel extends JPanel {
         });
     }
 
+
     public void resetGame() {
         mazeEnv.gameOver();
         stepCounter = 0;
@@ -59,10 +70,20 @@ public class MazePanel extends JPanel {
     private void handleKeyPress(KeyEvent e) {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
-            case KeyEvent.VK_UP -> movePlayer(MazeEnv.Action.UP);
-            case KeyEvent.VK_DOWN -> movePlayer(MazeEnv.Action.DOWN);
-            case KeyEvent.VK_LEFT -> movePlayer(MazeEnv.Action.LEFT);
-            case KeyEvent.VK_RIGHT -> movePlayer(MazeEnv.Action.RIGHT);
+            case KeyEvent.VK_UP:
+                movePlayer(MazeEnv.Action.UP);
+                break;
+            case KeyEvent.VK_DOWN:
+                movePlayer(MazeEnv.Action.DOWN);
+                break;
+            case KeyEvent.VK_LEFT:
+                movePlayer(MazeEnv.Action.LEFT);
+                break;
+            case KeyEvent.VK_RIGHT:
+                movePlayer(MazeEnv.Action.RIGHT);
+                break;
+            default:
+                break;
         }
     }
 
@@ -71,7 +92,6 @@ public class MazePanel extends JPanel {
         if (stepState.getItem2()) {
             stepCounter++;
             repaint();
-
             if (mazeEnv.getStepRemaining() == 0) {
                 parent.showMessage("Trò chơi kết thúc", new Dimension(300, 100));
                 mazeEnv.gameOver();
@@ -86,19 +106,7 @@ public class MazePanel extends JPanel {
 
             if (stepCounter == mazeEnv.maxStep) {
                 int buff = parent.openSkillDialog();
-                int debuff = Debuff.NONE;
-
-                if (mazeEnv.inGoalArea()) {
-                    List<Integer> debuffs = Debuff.getDebuffList();
-                    Random random = new Random();
-                    debuff = debuffs.get(random.nextInt(debuffs.size()));
-                    Pair<String, String> debuffInfo = Debuff.getDebuffInfo(debuff);
-                    String message = "<html><div style='text-align: center;'>" + debuffInfo.getItem1() + "</div><br>" +
-                            debuffInfo.getItem2().replace("\n", "<br>") + "</html>";
-                    parent.showMessage(message, new Dimension(400, 250));
-                }
-
-                mazeEnv.regenerateMaze(buff, debuff);
+                mazeEnv.regenerateMaze(buff, MazeEnv.Debuff.NONE);
                 stepCounter = 0;
             }
             repaint();
@@ -122,75 +130,86 @@ public class MazePanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Phần vẽ mê cung — chỉ phần này được sửa để thêm ảnh viền.
+     */
     @Override
-protected void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    Graphics2D g2d = (Graphics2D) g;
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
 
-    int panelWidth = getWidth();
-    int panelHeight = getHeight();
+        int panelWidth = getWidth();
+        int panelHeight = getHeight();
 
-    int cellWidth = (int) scale;
-    int cellHeight = (int) scale;
+        int cellWidth = (int) scale;
+        int cellHeight = (int) scale;
 
-    int mazePixelWidth = mazeSize * cellWidth;
-    int mazePixelHeight = mazeSize * cellHeight;
+        int mazePixelWidth = mazeSize * cellWidth;
+        int mazePixelHeight = mazeSize * cellHeight;
 
-    // ✅ Căn giữa mê cung theo panel
-    int offsetX = (panelWidth - mazePixelWidth) / 2;
-    int offsetY = (panelHeight - mazePixelHeight) / 2;
+        int offsetX = (panelWidth - mazePixelWidth) / 2;
+        int offsetY = (panelHeight - mazePixelHeight) / 2;
 
-    // ✅ Viền đậm hơn
-    g2d.setStroke(new BasicStroke(2));
+        g2d.setStroke(new BasicStroke(2));
 
-    // Lấy dữ liệu mê cung (toàn bộ hoặc khám phá)
-    int[][] mazeData = fullView ? mazeEnv.getMaze() : mazeEnv.getDiscoveredMaze();
+        int[][] mazeData = fullView ? mazeEnv.getMaze() : mazeEnv.getDiscoveredMaze();
 
-    for (int row = 0; row < mazeSize; row++) {
-        for (int col = 0; col < mazeSize; col++) {
-            int drawX = offsetX + col * cellWidth;
-            int drawY = offsetY + row * cellHeight;
+        for (int row = 0; row < mazeSize; row++) {
+            for (int col = 0; col < mazeSize; col++) {
+                int drawX = offsetX + col * cellWidth;
+                int drawY = offsetY + row * cellHeight;
 
-            switch (mazeData[row][col]) {
-                case Maze.WALL -> {
-                    g2d.setColor(new Color(0, 0, 0, 0));
-                    g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
-                }
-                case Maze.PATH -> {
-                    g2d.setColor(Color.WHITE);
-                    g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
-                }
-                case Maze.GOAL -> {
-                    g2d.setColor(Color.RED);
-                    g2d.fillOval(drawX, drawY, cellWidth, cellHeight);
-                }
-                case Maze.AGENT_POSITION -> {
-                    if (playerIcon != null) {
-                        g2d.drawImage(playerIcon, drawX, drawY, cellWidth, cellHeight, this);
+                // ✅ Vẽ gạch ở viền mê cung
+                if (row == 0 || row == mazeSize - 1 || col == 0 || col == mazeSize - 1) {
+                    if (wallTile != null) {
+                        g2d.drawImage(wallTile, drawX, drawY, cellWidth, cellHeight, this);
                     } else {
-                        g2d.setColor(Color.BLUE);
-                        g2d.fillOval(drawX, drawY, cellWidth, cellHeight);
-                    }
-                }
-                case Maze.UNEXPLORED -> {
-                    g2d.setColor(new Color(0, 0, 0, 0));
-                    g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
-                }
-                default -> {
-                    if (mazeData[row][col] == 5 * Maze.PATH) {
-                        g2d.setColor(Color.LIGHT_GRAY);
+                        g2d.setColor(Color.DARK_GRAY);
                         g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
                     }
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawRect(drawX, drawY, cellWidth, cellHeight);
+                    continue;
                 }
-            }
 
-            // ✅ Vẽ viền ô
-            g2d.setColor(Color.BLACK);
-            g2d.drawRect(drawX, drawY, cellWidth, cellHeight);
+                switch (mazeData[row][col]) {
+                    case Maze.WALL -> {
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
+                    }
+                    case Maze.PATH -> {
+                        g2d.setColor(Color.WHITE);
+                        g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
+                    }
+                    case Maze.GOAL -> {
+                        g2d.setColor(Color.RED);
+                        g2d.fillOval(drawX, drawY, cellWidth, cellHeight);
+                    }
+                    case Maze.AGENT_POSITION -> {
+                        if (playerIcon != null) {
+                            g2d.drawImage(playerIcon, drawX, drawY, cellWidth, cellHeight, this);
+                        } else {
+                            g2d.setColor(Color.BLUE);
+                            g2d.fillOval(drawX, drawY, cellWidth, cellHeight);
+                        }
+                    }
+                    case Maze.UNEXPLORED -> {
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
+                    }
+                    default -> {
+                        if (mazeData[row][col] == 5 * Maze.PATH) {
+                            g2d.setColor(Color.LIGHT_GRAY);
+                            g2d.fillRect(drawX, drawY, cellWidth, cellHeight);
+                        }
+                    }
+                }
+
+                g2d.setColor(Color.BLACK);
+                g2d.drawRect(drawX, drawY, cellWidth, cellHeight);
+            }
         }
     }
-}
-
 
     public void useSkill(int skill) {
         mazeEnv.regenerateMaze(skill, MazeEnv.Debuff.NONE);

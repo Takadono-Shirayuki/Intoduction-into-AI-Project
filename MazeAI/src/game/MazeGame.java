@@ -1,7 +1,6 @@
 package game;
 
 import javax.swing.*;
-
 import mazeinterface.GameForm;
 
 public class MazeGame {

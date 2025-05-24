@@ -1,50 +1,122 @@
 package mazeinterface.mazecontrol;
 
+import game.Main;
 import java.awt.*;
 import javax.swing.*;
 
-import game.Main;
-/**
- * Class InfoPanel hiển thị các thông tin ở bên trái mê cung 
- * Các thông tin hiển thị gồm số tầng (level) hiện tại, số bước đến khi reset, tỉ lệ nhận buff
- * Hiện tại các số đang để cố định, chưa có bộ đếm tự động
- */
 public class InfoPanel extends JPanel {
+    private JLabel floorLabel;
+    private JLabel stepsToRegenLabel;
+    private JLabel stepsRemainingLabel;
+    private JLabel buffProbabilityLabel;
+
+    private int floor = 1;
+    private int numsStepUntilRegenerate = 0;
+    private int stepsRemaining = 0;
+    private int receiveBuffProbability = 0;
+
+    private Image backgroundImage;
 
     public InfoPanel() {
-        Main.setInfoPanel(this);
-        
-        // Kích cỡ panel
-        setPreferredSize(new Dimension(300, 900));
-
-        setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
-
-        // Làm nền trong suốt
+        int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
+        setPreferredSize(new Dimension(380, screenHeight / 3));
         setOpaque(false);
-
+        setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        JLabel floorLabel = new JLabel("Tầng hiện tại: 1");
-        JLabel stepsLabel = new JLabel("Số bước còn lại: 30");
-        JLabel buffLabel = new JLabel("Tỉ lệ nhận buff: 25%");
+        try {
+            backgroundImage = new ImageIcon(getClass().getResource("/mazeai/Icon/SkillCard.jpg")).getImage();
+        } catch (Exception e) {
+            System.err.println("Không thể tải ảnh nền InfoPanel.");
+        }
 
-        // Định dạng
-        Font labelFont = new Font("SansSerif", Font.BOLD, 25);
-        floorLabel.setFont(labelFont);
-        stepsLabel.setFont(labelFont);
-        buffLabel.setFont(labelFont);
-
-        // Màu sắc
+        Font labelFont = new Font("SansSerif", Font.BOLD, 20);
         Color textColor = Color.WHITE;
-        floorLabel.setForeground(textColor);
-        stepsLabel.setForeground(textColor);
-        buffLabel.setForeground(textColor);
 
-        // Khoảng cách giữa các dòng
-        add(floorLabel);
-        add(Box.createVerticalStrut(25));
-        add(stepsLabel);
-        add(Box.createVerticalStrut(25));
-        add(buffLabel);
+        // Tạo các label
+        floorLabel = createLabel("Tầng hiện tại: " + floor, labelFont, textColor);
+        floorLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+        stepsToRegenLabel = createLabel("Số bước trước khi reset: " + numsStepUntilRegenerate, labelFont, textColor);
+        stepsToRegenLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+        stepsRemainingLabel = createLabel("Số bước còn lại (tổng) " + stepsRemaining, labelFont, textColor);
+        stepsRemainingLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+        buffProbabilityLabel = createLabel("Tỉ lệ nhận buff: " + receiveBuffProbability + "%", labelFont, textColor);
+        buffProbabilityLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+        // Tạo contentBox để bọc label vào giữa
+        JPanel contentBox = new JPanel();
+        contentBox.setOpaque(false);
+        contentBox.setLayout(new BoxLayout(contentBox, BoxLayout.Y_AXIS));
+
+        contentBox.add(floorLabel);
+        contentBox.add(Box.createVerticalStrut(20));
+        contentBox.add(stepsToRegenLabel);
+        contentBox.add(Box.createVerticalStrut(20));
+        contentBox.add(stepsRemainingLabel);
+        contentBox.add(Box.createVerticalStrut(20));
+        contentBox.add(buffProbabilityLabel);
+
+        // Thêm glue để căn giữa dọc
+        add(Box.createVerticalGlue());
+        add(contentBox);
+        add(Box.createVerticalGlue());
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
+        super.paintComponent(g);
+    }
+
+    private JLabel createLabel(String text, Font font, Color color) {
+        JLabel label = new JLabel(text);
+        label.setFont(font);
+        label.setForeground(color);
+        return label;
+    }
+
+    public int getFloor() {
+        return floor;
+    }
+
+    public void setFloor(int value) {
+        this.floor = value;
+        floorLabel.setText("Tầng hiện tại: " + value);
+        Main.setVariableValue(Main.GameStateVariable.FLOOR, value);
+    }
+
+    public int getNumsStepUntilRegenerate() {
+        return numsStepUntilRegenerate;
+    }
+
+    public void setNumsStepUntilRegenerate(int value) {
+        this.numsStepUntilRegenerate = value;
+        stepsToRegenLabel.setText("Số bước trước khi reset: " + value);
+        Main.setVariableValue(Main.GameStateVariable.NUMS_STEP_UNTIL_REGENERATE, value);
+    }
+
+    public int getStepsRemaining() {
+        return stepsRemaining;
+    }
+
+    public void setStepsRemaining(int value) {
+        this.stepsRemaining = value;
+        stepsRemainingLabel.setText("Số bước còn lại (tổng) " + value);
+        Main.setVariableValue(Main.GameStateVariable.STEPS_REMAINING, value);
+    }
+
+    public int getReceiveBuffProbability() {
+        return receiveBuffProbability;
+    }
+
+    public void setReceiveBuffProbability(int value) {
+        this.receiveBuffProbability = value;
+        buffProbabilityLabel.setText("Tỉ lệ nhận buff: " + value + "%");
+        Main.setVariableValue(Main.GameStateVariable.RECEIVE_BUFF_PROBABILITY, value);
     }
 }

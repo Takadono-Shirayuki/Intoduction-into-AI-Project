@@ -140,9 +140,6 @@ public class GameForm extends JFrame {
     }
 
     public int openSkillDialog(){
-        if (skillDialog == null) {
-            skillDialog = new SkillDialog(this);
-        }
         int r=(int)(Math.random()*4);
         int[] all={Buff.SENRIGAN,Buff.SLIME_SAN_ONEGAI,Buff.TOU_NO_HIKARI,Buff.UNMEI_NO_MICHI};
         int[] pick=new int[3]; int idx=0;

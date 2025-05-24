@@ -7,7 +7,7 @@ import mazeinterface.mazedialog.ChooseCompanionDialog;
 public class CheckLevelSelector {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new ChooseCompanionDialog(new MainForm()).setVisible(true);
+            new ChooseCompanionDialog(new MainForm());
         });
     }
 }
