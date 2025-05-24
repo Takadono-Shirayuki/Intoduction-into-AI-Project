@@ -1,20 +1,9 @@
 package mazeinterface.mazecontrol;
 
-import javax.swing.*;
-import java.awt.*;
 import game.Main;
+import java.awt.*;
+import javax.swing.*;
 
-/**
- * {@code InfoPanel} là bảng hiển thị thông tin trạng thái người chơi trong mê cung.
- * Gồm các thông tin:
- * <ul>
- *   <li>Tầng hiện tại</li>
- *   <li>Số bước còn lại đến khi tái tạo</li>
- *   <li>Tổng số bước còn lại</li>
- *   <li>Tỉ lệ nhận buff</li>
- * </ul>
- * Panel này sử dụng ảnh nền, giới hạn chiều cao bằng nửa màn hình và đồng bộ dữ liệu với {@code Main}.
- */
 public class InfoPanel extends JPanel {
     private JLabel floorLabel;
     private JLabel stepsToRegenLabel;
@@ -28,18 +17,15 @@ public class InfoPanel extends JPanel {
 
     private Image backgroundImage;
 
-    /**
-     * Tạo bảng thông tin người chơi với ảnh nền và chiều cao bằng 1/2 màn hình.
-     */
     public InfoPanel() {
         int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
-        setPreferredSize(new Dimension(280, screenHeight / 2));
+        setPreferredSize(new Dimension(380, screenHeight / 3));
         setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         try {
-            backgroundImage = new ImageIcon(getClass().getResource("/mazeai/MazeImage/InfoPanelBackground.jpg")).getImage();
+            backgroundImage = new ImageIcon(getClass().getResource("/mazeai/Icon/SkillCard.jpg")).getImage();
         } catch (Exception e) {
             System.err.println("Không thể tải ảnh nền InfoPanel.");
         }
@@ -47,25 +33,38 @@ public class InfoPanel extends JPanel {
         Font labelFont = new Font("SansSerif", Font.BOLD, 20);
         Color textColor = Color.WHITE;
 
+        // Tạo các label
         floorLabel = createLabel("Tầng hiện tại: " + floor, labelFont, textColor);
-        stepsToRegenLabel = createLabel("Số bước còn lại: " + numsStepUntilRegenerate, labelFont, textColor);
-        stepsRemainingLabel = createLabel("<html>Số bước còn lại<br>(tổng): " + stepsRemaining + "</html>", labelFont, textColor);
-        buffProbabilityLabel = createLabel("Tỉ lệ nhận buff: " + receiveBuffProbability + "%", labelFont, textColor);
+        floorLabel.setAlignmentX(CENTER_ALIGNMENT);
 
-        add(floorLabel);
-        add(Box.createVerticalStrut(20));
-        add(stepsToRegenLabel);
-        add(Box.createVerticalStrut(20));
-        add(stepsRemainingLabel);
-        add(Box.createVerticalStrut(20));
-        add(buffProbabilityLabel);
+        stepsToRegenLabel = createLabel("Số bước trước khi reset: " + numsStepUntilRegenerate, labelFont, textColor);
+        stepsToRegenLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+        stepsRemainingLabel = createLabel("Số bước còn lại (tổng) " + stepsRemaining, labelFont, textColor);
+        stepsRemainingLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+        buffProbabilityLabel = createLabel("Tỉ lệ nhận buff: " + receiveBuffProbability + "%", labelFont, textColor);
+        buffProbabilityLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+        // Tạo contentBox để bọc label vào giữa
+        JPanel contentBox = new JPanel();
+        contentBox.setOpaque(false);
+        contentBox.setLayout(new BoxLayout(contentBox, BoxLayout.Y_AXIS));
+
+        contentBox.add(floorLabel);
+        contentBox.add(Box.createVerticalStrut(20));
+        contentBox.add(stepsToRegenLabel);
+        contentBox.add(Box.createVerticalStrut(20));
+        contentBox.add(stepsRemainingLabel);
+        contentBox.add(Box.createVerticalStrut(20));
+        contentBox.add(buffProbabilityLabel);
+
+        // Thêm glue để căn giữa dọc
+        add(Box.createVerticalGlue());
+        add(contentBox);
+        add(Box.createVerticalGlue());
     }
 
-    /**
-     * Vẽ ảnh nền (nếu có) được resize theo kích thước panel.
-     *
-     * @param g đối tượng đồ họa
-     */
     @Override
     protected void paintComponent(Graphics g) {
         if (backgroundImage != null) {
@@ -74,14 +73,6 @@ public class InfoPanel extends JPanel {
         super.paintComponent(g);
     }
 
-    /**
-     * Tạo JLabel chuẩn với định dạng font và màu.
-     *
-     * @param text nội dung hiển thị
-     * @param font font chữ
-     * @param color màu chữ
-     * @return JLabel được định dạng
-     */
     private JLabel createLabel(String text, Font font, Color color) {
         JLabel label = new JLabel(text);
         label.setFont(font);
@@ -89,72 +80,40 @@ public class InfoPanel extends JPanel {
         return label;
     }
 
-    /**
-     * Lấy tầng hiện tại.
-     * @return số tầng
-     */
     public int getFloor() {
         return floor;
     }
 
-    /**
-     * Cập nhật tầng hiện tại và đồng bộ với {@code Main}.
-     * @param value số tầng mới
-     */
     public void setFloor(int value) {
         this.floor = value;
         floorLabel.setText("Tầng hiện tại: " + value);
         Main.setVariableValue(Main.GameStateVariable.FLOOR, value);
     }
 
-    /**
-     * Lấy số bước còn lại trước khi tái tạo.
-     * @return số bước còn lại
-     */
     public int getNumsStepUntilRegenerate() {
         return numsStepUntilRegenerate;
     }
 
-    /**
-     * Cập nhật số bước còn lại trước khi tái tạo và đồng bộ với {@code Main}.
-     * @param value số bước
-     */
     public void setNumsStepUntilRegenerate(int value) {
         this.numsStepUntilRegenerate = value;
-        stepsToRegenLabel.setText("Số bước còn lại: " + value);
+        stepsToRegenLabel.setText("Số bước trước khi reset: " + value);
         Main.setVariableValue(Main.GameStateVariable.NUMS_STEP_UNTIL_REGENERATE, value);
     }
 
-    /**
-     * Lấy tổng số bước còn lại.
-     * @return số bước còn lại
-     */
     public int getStepsRemaining() {
         return stepsRemaining;
     }
 
-    /**
-     * Cập nhật tổng số bước còn lại và đồng bộ với {@code Main}.
-     * @param value số bước
-     */
     public void setStepsRemaining(int value) {
         this.stepsRemaining = value;
-        stepsRemainingLabel.setText("<html>Số bước còn lại<br>(tổng): " + value + "</html>");
+        stepsRemainingLabel.setText("Số bước còn lại (tổng) " + value);
         Main.setVariableValue(Main.GameStateVariable.STEPS_REMAINING, value);
     }
 
-    /**
-     * Lấy tỉ lệ nhận buff hiện tại.
-     * @return phần trăm nhận buff
-     */
     public int getReceiveBuffProbability() {
         return receiveBuffProbability;
     }
 
-    /**
-     * Cập nhật tỉ lệ nhận buff và đồng bộ với {@code Main}.
-     * @param value tỉ lệ phần trăm (0–100)
-     */
     public void setReceiveBuffProbability(int value) {
         this.receiveBuffProbability = value;
         buffProbabilityLabel.setText("Tỉ lệ nhận buff: " + value + "%");
