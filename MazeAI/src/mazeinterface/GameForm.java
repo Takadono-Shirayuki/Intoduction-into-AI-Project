@@ -71,7 +71,14 @@ public class GameForm extends JFrame {
         InfoPanel infoPanel = new InfoPanel();
         JPanel combinedPanel = new JPanel(new BorderLayout());
         combinedPanel.setOpaque(false);
-        combinedPanel.add(infoPanel, BorderLayout.WEST);
+        JPanel infoWrapper = new JPanel(new BorderLayout());
+        infoWrapper.setPreferredSize(infoPanel.getPreferredSize());
+        infoWrapper.setMaximumSize(infoPanel.getPreferredSize());
+        infoWrapper.setOpaque(false);
+        infoWrapper.add(infoPanel, BorderLayout.NORTH);
+
+        combinedPanel.add(infoWrapper, BorderLayout.WEST);
+
         combinedPanel.add(mazePanel, BorderLayout.CENTER);
         add(combinedPanel, BorderLayout.CENTER);
 
