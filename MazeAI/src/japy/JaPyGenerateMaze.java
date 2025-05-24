@@ -24,5 +24,16 @@ public class JaPyGenerateMaze {
         } else {
             return null;
         }
-    }    
+    }
+    public Maze regenerateMaze(int posX, int posY, int goalX, int goalY) {
+        jaPy.createPythonProcess();
+        StringBuilder sb = new StringBuilder();
+        sb.append(posX).append(" ").append(posY).append("\n");
+        sb.append(goalX).append(" ").append(goalY).append("\n");
+        Pair<String, Boolean> result = jaPy.runPythonScript(sb.toString());
+
+        // process here
+        
+        return new Maze(null);
+    }
 }
